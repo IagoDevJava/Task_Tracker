@@ -1,9 +1,11 @@
+package program_entities;
+
 import java.util.HashMap;
 import java.util.Objects;
 
 public class Epic extends Task {
 
-    HashMap<Integer, Subtask> allSubtasksOfEpic;
+    public HashMap<Long, Subtask> allSubtasksOfEpic;
 
     public Epic(String nameTask, String description) {
         super(nameTask, description);
@@ -26,7 +28,7 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return "Epic{"
+        return "program_entities.Epic{"
                 + "Name epic: " + getNameTask()
                 + ", Description: " + getDescription()
                 + ", Status: " + getStatus()

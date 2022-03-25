@@ -11,12 +11,15 @@ Second sprint homework
 3. Менять статусы у всех типов задач.
 
 Приложение написано на Java. Пример кода:
+
 ```java
+import program_logic.Manager;
+
 public class Main {
     public static void main(String[] args) {
 
         Manager manager = new Manager();
-        
+
     }
 }
 ```

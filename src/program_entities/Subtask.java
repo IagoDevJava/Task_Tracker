@@ -1,8 +1,12 @@
+package program_entities;
+
+import java.util.HashMap;
 import java.util.Objects;
 
 public class Subtask extends Task {
 
     private Epic epic;
+    private long myEpicID;
 
     public Subtask(String nameTask, String description) {
         super(nameTask, description);
@@ -14,6 +18,19 @@ public class Subtask extends Task {
 
     public void setEpic(Epic epic) {
         this.epic = epic;
+    }
+
+    public long getMyEpicID(HashMap<Long, Epic> epicHashMap, Epic epic) {
+        for (Long aLong : epicHashMap.keySet()) {
+            if (epicHashMap.get(aLong).equals(epic)) {
+                myEpicID = aLong;
+            }
+        }
+        return myEpicID;
+    }
+
+    public void setMyEpicID(long myEpicID) {
+        this.myEpicID = myEpicID;
     }
 
     @Override
@@ -32,7 +49,7 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return "Subtask{"
+        return "program_entities.Subtask{"
                 + "Name task: " + getNameTask()
                 + ", Description: " + getDescription()
                 + ", Status: " + getStatus()

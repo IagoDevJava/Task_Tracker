@@ -1,12 +1,14 @@
+package program_entities;
+
 import java.util.Objects;
 
 public class Task {
 
     private String nameTask;
-    private String status;
-    private final String STATUS_NEW = "NEW";
-    private final String STATUS_IN_PROGRESS = "IN_PROGRESS";
-    private final String STATUS_DONE = "DONE";
+    private Status status;
+//    private final String STATUS_NEW = "NEW";
+//    private final String STATUS_IN_PROGRESS = "IN_PROGRESS";
+//    private final String STATUS_DONE = "DONE";
     private String description;
 
     public Task(String nameTask, String description) {
@@ -22,27 +24,27 @@ public class Task {
         return nameTask;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public String getStatusNEW() {
-        return STATUS_NEW;
+    public Status getStatusNEW() {
+        return Status.NEW;
     }
 
-    public String getStatusIN_PROGRESS() {
-        return STATUS_IN_PROGRESS;
+    public Status getStatusIN_PROGRESS() {
+        return Status.IN_PROGRESS;
     }
 
-    public String getStatusDONE() {
-        return STATUS_DONE;
+    public Status getStatusDONE() {
+        return Status.DONE;
     }
 
     public void setNameTask(String nameTask) {
         this.nameTask = nameTask;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
@@ -57,20 +59,17 @@ public class Task {
         Task task = (Task) o;
         return Objects.equals(nameTask, task.nameTask)
                 && Objects.equals(status, task.status)
-                && Objects.equals(STATUS_NEW, task.STATUS_NEW)
-                && Objects.equals(STATUS_IN_PROGRESS, task.STATUS_IN_PROGRESS)
-                && Objects.equals(STATUS_DONE, task.STATUS_DONE)
                 && Objects.equals(description, task.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(nameTask, status, STATUS_NEW, STATUS_IN_PROGRESS, STATUS_DONE, description);
+        return Objects.hash(nameTask, status, description);
     }
 
     @Override
     public String toString() {
-        return "Task{"
+        return "program_entities.Task{"
                 + "Name task: " + getNameTask()
                 + ", Description: " + getDescription()
                 + ", Status: " + getStatus()

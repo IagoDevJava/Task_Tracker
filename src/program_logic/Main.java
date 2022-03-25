@@ -1,3 +1,9 @@
+package program_logic;
+
+import program_entities.Epic;
+import program_entities.Subtask;
+import program_entities.Task;
+
 public class Main {
     public static void main(String[] args) {
 
@@ -69,16 +75,6 @@ public class Main {
         System.out.println(manager.getListOfSubtask(e1));
         System.out.println("_________________________________________");
 
-//        //Удалить все задачи
-//        System.out.println("Удалить все задачи");
-//        manager.clearListOfTask();
-//        manager.clearListOfEpic();
-//        manager.clearListOfSubtask(e1);
-//        System.out.println(manager.getListOfTask());
-//        System.out.println(manager.getListOfEpic());
-//        System.out.println(manager.getListOfSubtask(e1));
-//        System.out.println("_________________________________________");
-
         //Обновить статус
         manager.setStatusForTask(t1, t1.getStatusIN_PROGRESS());
 //        manager.setStatusForTask(e1, e1.getStatusDONE());
@@ -86,5 +82,15 @@ public class Main {
         manager.setStatusForSubtask(s2, s2.getStatusDONE());
         System.out.println(manager.getListOfEpic());
         System.out.println(manager.getListOfSubtask(e1));
+
+        //Удалить все задачи
+        System.out.println("Удалить все задачи");
+        manager.clearListOfTask();
+        manager.clearListOfEpic();
+        manager.clearListOfSubtask(e1);
+        System.out.println(manager.getListOfTask());
+        System.out.println(manager.getListOfEpic());
+        System.out.println(manager.getListOfSubtask(e1));
+        System.out.println("_________________________________________");
     }
 }
