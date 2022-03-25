@@ -5,32 +5,25 @@ import java.util.Objects;
 
 public class Subtask extends Task {
 
-    private Epic epic;
     private long myEpicID;
+    /**Я так долго бился над получением этой ссылки Epic epic, а в итоге зря ;(
+    Мне показалось, что это значительно упрощает код и делает его более элегантным :)
+     */
 
     public Subtask(String nameTask, String description) {
         super(nameTask, description);
     }
 
-    public Epic getEpic() {
-        return epic;
-    }
-
-    public void setEpic(Epic epic) {
-        this.epic = epic;
-    }
-
-    public long getMyEpicID(HashMap<Long, Epic> epicHashMap, Epic epic) {
+    public void setMyEpicID(HashMap<Long, Epic> epicHashMap, Epic epic) {
         for (Long aLong : epicHashMap.keySet()) {
             if (epicHashMap.get(aLong).equals(epic)) {
                 myEpicID = aLong;
             }
         }
-        return myEpicID;
     }
 
-    public void setMyEpicID(long myEpicID) {
-        this.myEpicID = myEpicID;
+    public long getMyEpicID() {
+        return myEpicID;
     }
 
     @Override
@@ -39,12 +32,12 @@ public class Subtask extends Task {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Subtask subtask = (Subtask) o;
-        return Objects.equals(epic, subtask.epic);
+        return myEpicID == subtask.myEpicID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), epic);
+        return Objects.hash(super.hashCode(), myEpicID);
     }
 
     @Override

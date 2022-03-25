@@ -40,8 +40,7 @@ public class Manager {
      * Создание подзадачи. Сам объект должен передаваться в качестве параметра.
      */
     public Subtask createTask(Subtask subtask, Epic epic) {
-        subtask.setEpic(epic);
-        subtask.setMyEpicID(subtask.getMyEpicID(allEpicTasks,epic));
+        subtask.setMyEpicID(allEpicTasks,epic);
         subtask.setStatus(subtask.getStatusNEW());
         epic.allSubtasksOfEpic.put(++numberID, subtask);
         return subtask;
@@ -170,7 +169,7 @@ public class Manager {
      */
     public void enterNewEpic(long numberID, Epic oldEpic, Epic newEpic) {
         if (!allEpicTasks.isEmpty() && allEpicTasks.get(numberID) != null) {
-            createStatusForEpic(newEpic);
+            createStatusForEpic(numberID);
             allEpicTasks.put(numberID, newEpic);
             newEpic.allSubtasksOfEpic = oldEpic.allSubtasksOfEpic;
         } else {
@@ -242,30 +241,31 @@ public class Manager {
     public Subtask setStatusForSubtask(Subtask subtask, Status status) {
         subtask.setStatus(status);
         allTasks.put(++numberID, subtask);
-        createStatusForEpic(subtask.getEpic());
+        createStatusForEpic(subtask.getMyEpicID());
         return subtask;
     }
 
     /**
      * Расчет статуса для эпиков
      */
-    public void createStatusForEpic(Epic epic) {
+    public void createStatusForEpic(long numberEpicID) {
         boolean isStatus = true;
-        for (Long aLong : epic.allSubtasksOfEpic.keySet()) {
-            if (epic.allSubtasksOfEpic.get(aLong).getStatus().equals(Status.DONE)) {
+        Epic thisEpic = allEpicTasks.get(numberEpicID); //Создал для улучшения читабельности кода
+        for (Long aLong : thisEpic.allSubtasksOfEpic.keySet()) {
+            if (thisEpic.allSubtasksOfEpic.get(aLong).getStatus().equals(Status.DONE)) {
                 isStatus = false;
-            } else if (epic.allSubtasksOfEpic.get(aLong).getStatus()
+            } else if (thisEpic.allSubtasksOfEpic.get(aLong).getStatus()
                     .equals(Status.IN_PROGRESS)) {
                 isStatus = true;
                 break;
             }
         }
         if (isStatus) {
-            epic.setStatus(epic.getStatusIN_PROGRESS());
+            thisEpic.setStatus(thisEpic.getStatusIN_PROGRESS());
         } else {
-            epic.setStatus(epic.getStatusDONE());
+            thisEpic.setStatus(thisEpic.getStatusDONE());
         }
-        allTasks.put(++numberID, epic);
+        allTasks.put(++numberID, thisEpic);
     }
 
     @Override

@@ -6,9 +6,6 @@ public class Task {
 
     private String nameTask;
     private Status status;
-//    private final String STATUS_NEW = "NEW";
-//    private final String STATUS_IN_PROGRESS = "IN_PROGRESS";
-//    private final String STATUS_DONE = "DONE";
     private String description;
 
     public Task(String nameTask, String description) {
