@@ -6,9 +6,6 @@ import java.util.Objects;
 public class Subtask extends Task {
 
     private long myEpicID;
-    /**Я так долго бился над получением этой ссылки Epic epic, а в итоге зря ;(
-    Мне показалось, что это значительно упрощает код и делает его более элегантным :)
-     */
 
     public Subtask(String nameTask, String description) {
         super(nameTask, description);
