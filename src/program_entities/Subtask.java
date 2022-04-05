@@ -39,7 +39,7 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return "program_entities.Subtask{"
+        return "Subtask{"
                 + "Name task: " + getNameTask()
                 + ", Description: " + getDescription()
                 + ", Status: " + getStatus()

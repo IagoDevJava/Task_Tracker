@@ -5,22 +5,30 @@ import program_entities.Status;
 import program_entities.Subtask;
 import program_entities.Task;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
-public class Manager {
+public class InMemoryTaskManager implements TaskManager {
 
     private long numberID = 0L;
 
     /**
-     * Возможность хранить задачи всех типов. Для этого вам нужно выбрать подходящую коллекцию.
+     * Возможность хранить задачи всех типов.
      */
     HashMap<Long, Task> allTasks = new HashMap<>();
     HashMap<Long, Epic> allEpicTasks = new HashMap<>();
 
     /**
+     * Возможность хранить историю просмотров задач всех типов.
+     */
+    List<Task> historyViewsOfTasks = new ArrayList<>(10);
+
+    /**
      * Создание задачи. Сам объект должен передаваться в качестве параметра.
      */
+    @Override
     public Task createTask(Task task) {
         task.setStatus(task.getStatusNEW());
         allTasks.put(++numberID, task);
@@ -30,6 +38,7 @@ public class Manager {
     /**
      * Создание эпика. Сам объект должен передаваться в качестве параметра.
      */
+    @Override
     public Epic createTask(Epic epic) {
         epic.setStatus(epic.getStatusNEW());
         allEpicTasks.put(++numberID, epic);
@@ -39,8 +48,9 @@ public class Manager {
     /**
      * Создание подзадачи. Сам объект должен передаваться в качестве параметра.
      */
+    @Override
     public Subtask createTask(Subtask subtask, Epic epic) {
-        subtask.setMyEpicID(allEpicTasks,epic);
+        subtask.setMyEpicID(allEpicTasks, epic);
         subtask.setStatus(subtask.getStatusNEW());
         epic.allSubtasksOfEpic.put(++numberID, subtask);
         return subtask;
@@ -49,6 +59,7 @@ public class Manager {
     /**
      * Получение списка всех задач.
      */
+    @Override
     public String getListOfTask() {
         String listOfTask = "";
         if (!allTasks.isEmpty()) {
@@ -64,6 +75,7 @@ public class Manager {
     /**
      * Получение списка всех эпиков.
      */
+    @Override
     public String getListOfEpic() {
         String listOfEpic = "";
         if (!allEpicTasks.isEmpty()) {
@@ -79,6 +91,7 @@ public class Manager {
     /**
      * Получение списка всех подзадач.
      */
+    @Override
     public String getListOfSubtask(Epic epic) {
         String listOfSubtask = "";
         if (!epic.allSubtasksOfEpic.isEmpty() && allEpicTasks.containsValue(epic)) {
@@ -94,6 +107,7 @@ public class Manager {
     /**
      * Удаление всех задач.
      */
+    @Override
     public void clearListOfTask() {
         allTasks.clear();
     }
@@ -101,6 +115,7 @@ public class Manager {
     /**
      * Удаление всех эпиков.
      */
+    @Override
     public void clearListOfEpic() {
         allEpicTasks.clear();
     }
@@ -108,6 +123,7 @@ public class Manager {
     /**
      * Удаление всех подзадач.
      */
+    @Override
     public void clearListOfSubtask(Epic epic) {
         epic.allSubtasksOfEpic.clear();
     }
@@ -115,6 +131,7 @@ public class Manager {
     /**
      * Получение задачи по идентификатору.
      */
+    @Override
     public String getTaskForID(long numberID) {
         String neededTask = "";
         if (!allTasks.isEmpty() && allTasks.get(numberID) != null) {
@@ -128,6 +145,7 @@ public class Manager {
     /**
      * Получение эпика по идентификатору.
      */
+    @Override
     public String getEpicForID(long numberID) {
         String neededEpic = "";
         if (!allEpicTasks.isEmpty() && allEpicTasks.get(numberID) != null) {
@@ -141,6 +159,7 @@ public class Manager {
     /**
      * Получение подзадачи по идентификатору.
      */
+    @Override
     public String getSubtaskForID(long numberID, Epic epic) {
         String neededSubtask = "";
         if (!epic.allSubtasksOfEpic.isEmpty() && epic.allSubtasksOfEpic.get(numberID) != null
@@ -155,6 +174,7 @@ public class Manager {
     /**
      * Обновление задачи.
      */
+    @Override
     public void enterNewTask(long numberID, Task task) {
         if (!allTasks.isEmpty() && allTasks.get(numberID) != null) {
             task.setStatus(task.getStatusNEW());
@@ -167,6 +187,7 @@ public class Manager {
     /**
      * Обновление эпика.
      */
+    @Override
     public void enterNewEpic(long numberID, Epic oldEpic, Epic newEpic) {
         if (!allEpicTasks.isEmpty() && allEpicTasks.get(numberID) != null) {
             createStatusForEpic(numberID);
@@ -180,6 +201,7 @@ public class Manager {
     /**
      * Обновление подзадачи.
      */
+    @Override
     public void enterNewSubtask(long numberID, Subtask subtask, Epic epic) {
         if (!epic.allSubtasksOfEpic.isEmpty() && epic.allSubtasksOfEpic.get(numberID) != null) {
             subtask.setStatus(subtask.getStatusNEW());
@@ -192,6 +214,7 @@ public class Manager {
     /**
      * Удаление задачи по идентификатору.
      */
+    @Override
     public void deleteTaskForID(long numberID) {
         if (!allTasks.isEmpty() && allTasks.get(numberID) != null) {
             allTasks.remove(numberID);
@@ -203,6 +226,7 @@ public class Manager {
     /**
      * Удаление эпика по идентификатору.
      */
+    @Override
     public void deleteEpicForID(long numberID) {
         if (!allEpicTasks.isEmpty() && allEpicTasks.get(numberID) != null) {
             allEpicTasks.remove(numberID);
@@ -214,6 +238,7 @@ public class Manager {
     /**
      * Удаление подзадачи по идентификатору.
      */
+    @Override
     public void deleteSubtaskForID(long numberID, Epic epic) {
         if (!epic.allSubtasksOfEpic.isEmpty() && epic.allSubtasksOfEpic.get(numberID) != null) {
             epic.allSubtasksOfEpic.remove(numberID);
@@ -225,6 +250,7 @@ public class Manager {
     /**
      * Установка статуса для задачи
      */
+    @Override
     public Task setStatusForTask(Task task, Status status) {
         if (task instanceof Epic) {
             System.out.println("Действие невозможно, проверьте статусы подзадач");
@@ -238,6 +264,7 @@ public class Manager {
     /**
      * Установка статуса для подзадачи
      */
+    @Override
     public Subtask setStatusForSubtask(Subtask subtask, Status status) {
         subtask.setStatus(status);
         allTasks.put(++numberID, subtask);
@@ -248,6 +275,7 @@ public class Manager {
     /**
      * Расчет статуса для эпиков
      */
+    @Override
     public void createStatusForEpic(long numberEpicID) {
         boolean isStatus = true;
         Epic thisEpic = allEpicTasks.get(numberEpicID); //Создал для улучшения читабельности кода
@@ -272,10 +300,10 @@ public class Manager {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Manager manager = (Manager) o;
-        return numberID == manager.numberID
-                && Objects.equals(allTasks, manager.allTasks)
-                && Objects.equals(allEpicTasks, manager.allEpicTasks);
+        InMemoryTaskManager inMemoryTaskManager = (InMemoryTaskManager) o;
+        return numberID == inMemoryTaskManager.numberID
+                && Objects.equals(allTasks, inMemoryTaskManager.allTasks)
+                && Objects.equals(allEpicTasks, inMemoryTaskManager.allEpicTasks);
     }
 
     @Override

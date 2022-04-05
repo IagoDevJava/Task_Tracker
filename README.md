@@ -13,12 +13,12 @@ Second sprint homework
 Приложение написано на Java. Пример кода:
 
 ```java
-import program_logic.Manager;
+import program_logic.InMemoryTaskManager;
 
 public class Main {
     public static void main(String[] args) {
 
-        Manager manager = new Manager();
+        InMemoryTaskManager inMemoryTaskManager = new InMemoryTaskManager();
 
     }
 }

@@ -66,7 +66,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return "program_entities.Task{"
+        return "Task{"
                 + "Name task: " + getNameTask()
                 + ", Description: " + getDescription()
                 + ", Status: " + getStatus()
