@@ -1,4 +1,4 @@
-package program_entities;
+package tasks_types;
 
 public enum Status {
     NEW,

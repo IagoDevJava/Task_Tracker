@@ -1,4 +1,4 @@
-package program_entities;
+package tasks_types;
 
 import java.util.HashMap;
 import java.util.Objects;

@@ -1,29 +1,22 @@
-package program_logic;
+package managers_types;
 
-import program_entities.Epic;
-import program_entities.Status;
-import program_entities.Subtask;
-import program_entities.Task;
+import tasks_types.Epic;
+import tasks_types.Status;
+import tasks_types.Subtask;
+import tasks_types.Task;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
 
 public class InMemoryTaskManager implements TaskManager {
 
-    private long numberID = 0L;
-
+    private final HistoryManager historyManager = Managers.getDefaultHistory();
     /**
      * Возможность хранить задачи всех типов.
      */
     HashMap<Long, Task> allTasks = new HashMap<>();
     HashMap<Long, Epic> allEpicTasks = new HashMap<>();
-
-    /**
-     * Возможность хранить историю просмотров задач всех типов.
-     */
-    List<Task> historyViewsOfTasks = new ArrayList<>(10);
+    private long numberID = 0L;
 
     /**
      * Создание задачи. Сам объект должен передаваться в качестве параметра.
@@ -133,9 +126,11 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public String getTaskForID(long numberID) {
+        Task task = allTasks.get(numberID);
+        getHistoryManager().addHistory(task);
         String neededTask = "";
-        if (!allTasks.isEmpty() && allTasks.get(numberID) != null) {
-            neededTask = numberID + " " + allTasks.get(numberID);
+        if (!allTasks.isEmpty() && task != null) {
+            neededTask = numberID + " " + task;
         } else {
             neededTask = "Задачи с таким ID нет в списке.";
         }
@@ -147,9 +142,11 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public String getEpicForID(long numberID) {
+        Epic epic = allEpicTasks.get(numberID);
+        getHistoryManager().addHistory(epic);
         String neededEpic = "";
-        if (!allEpicTasks.isEmpty() && allEpicTasks.get(numberID) != null) {
-            neededEpic = numberID + " " + allEpicTasks.get(numberID);
+        if (!allEpicTasks.isEmpty() && epic != null) {
+            neededEpic = numberID + " " + epic;
         } else {
             neededEpic = "Задачи с таким ID нет в списке.";
         }
@@ -161,10 +158,12 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public String getSubtaskForID(long numberID, Epic epic) {
+        Subtask subTask = epic.allSubtasksOfEpic.get(numberID);
+        getHistoryManager().addHistory(subTask);
         String neededSubtask = "";
-        if (!epic.allSubtasksOfEpic.isEmpty() && epic.allSubtasksOfEpic.get(numberID) != null
+        if (!epic.allSubtasksOfEpic.isEmpty() && subTask != null
                 && allEpicTasks.containsValue(epic)) {
-            neededSubtask = numberID + " " + epic.allSubtasksOfEpic.get(numberID);
+            neededSubtask = numberID + " " + subTask;
         } else {
             neededSubtask = "Задачи с таким ID нет в списке.";
         }
@@ -296,19 +295,28 @@ public class InMemoryTaskManager implements TaskManager {
         allTasks.put(++numberID, thisEpic);
     }
 
+    /**
+     * Получаем объект для получения и добавления истории
+     */
+    @Override
+    public HistoryManager getHistoryManager() {
+        return historyManager;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        InMemoryTaskManager inMemoryTaskManager = (InMemoryTaskManager) o;
-        return numberID == inMemoryTaskManager.numberID
-                && Objects.equals(allTasks, inMemoryTaskManager.allTasks)
-                && Objects.equals(allEpicTasks, inMemoryTaskManager.allEpicTasks);
+        InMemoryTaskManager that = (InMemoryTaskManager) o;
+        return numberID == that.numberID
+                && Objects.equals(historyManager, that.historyManager)
+                && Objects.equals(allTasks, that.allTasks)
+                && Objects.equals(allEpicTasks, that.allEpicTasks);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(numberID, allTasks, allEpicTasks);
+        return Objects.hash(numberID, allTasks, allEpicTasks, historyManager);
     }
 
     @Override

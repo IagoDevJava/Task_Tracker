@@ -13,7 +13,7 @@ Second sprint homework
 Приложение написано на Java. Пример кода:
 
 ```java
-import program_logic.InMemoryTaskManager;
+import managers_types.InMemoryTaskManager;
 
 public class Main {
     public static void main(String[] args) {
