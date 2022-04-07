@@ -1,26 +1,22 @@
 package tasks_types;
 
-import java.util.HashMap;
 import java.util.Objects;
 
 public class Subtask extends Task {
 
     private long myEpicID;
 
-    public Subtask(String nameTask, String description) {
+    public Subtask(String nameTask, String description, long myEpicID) {
         super(nameTask, description);
-    }
-
-    public void setMyEpicID(HashMap<Long, Epic> epicHashMap, Epic epic) {
-        for (Long aLong : epicHashMap.keySet()) {
-            if (epicHashMap.get(aLong).equals(epic)) {
-                myEpicID = aLong;
-            }
-        }
+        this.myEpicID = myEpicID;
     }
 
     public long getMyEpicID() {
         return myEpicID;
+    }
+
+    public void setMyEpicID(long myEpicID) {
+        this.myEpicID = myEpicID;
     }
 
     @Override
@@ -39,10 +35,12 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return "Subtask{"
-                + "Name task: " + getNameTask()
-                + ", Description: " + getDescription()
-                + ", Status: " + getStatus()
-                + "}";
+        return "Subtask{" +
+                "nameTask='" + super.getNameTask() + '\'' +
+                ", description='" + super.getDescription() + '\'' +
+                ", status=" + super.getStatus() +
+                ", numberId=" + super.getNumberId() +
+                ", myEpicID=" + myEpicID +
+                '}';
     }
 }

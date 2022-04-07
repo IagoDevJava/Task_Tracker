@@ -5,37 +5,45 @@ import tasks_types.Status;
 import tasks_types.Subtask;
 import tasks_types.Task;
 
+import java.util.ArrayList;
+
 public interface TaskManager {
 
     /**
      * Создание задачи. Сам объект должен передаваться в качестве параметра.
+     *
+     * @return
      */
-    Task createTask(Task task);
+    long createTask(Task task);
 
     /**
      * Создание эпика. Сам объект должен передаваться в качестве параметра.
+     *
+     * @return
      */
-    Epic createTask(Epic epic);
+    long createTask(Epic epic);
 
     /**
      * Создание подзадачи. Сам объект должен передаваться в качестве параметра.
+     *
+     * @return
      */
-    Subtask createTask(Subtask subtask, Epic epic);
+    long createTask(Subtask subtask);
 
     /**
      * Получение списка всех задач.
      */
-    String getListOfTask();
+    ArrayList<Task> getListOfTask();
 
     /**
      * Получение списка всех эпиков.
      */
-    String getListOfEpic();
+    ArrayList<Task> getListOfEpic();
 
     /**
      * Получение списка всех подзадач.
      */
-    String getListOfSubtask(Epic epic);
+    ArrayList<Task> getListOfSubtask();
 
     /**
      * Удаление всех задач.
@@ -50,37 +58,43 @@ public interface TaskManager {
     /**
      * Удаление всех подзадач.
      */
-    void clearListOfSubtask(Epic epic);
+    void clearListOfSubtask();
 
     /**
      * Получение задачи по идентификатору.
+     *
+     * @return
      */
-    String getTaskForID(long numberID);
+    Task getTaskByID(long numberID);
 
     /**
      * Получение эпика по идентификатору.
+     *
+     * @return
      */
-    String getEpicForID(long numberID);
+    Epic getEpicByID(long numberID);
 
     /**
      * Получение подзадачи по идентификатору.
+     *
+     * @return
      */
-    String getSubtaskForID(long numberID, Epic epic);
+    Subtask getSubtaskByID(long numberID);
 
     /**
      * Обновление задачи.
      */
-    void enterNewTask(long numberID, Task task);
+    void upgradeTask(Task task);
 
     /**
      * Обновление эпика.
      */
-    void enterNewEpic(long numberID, Epic oldEpic, Epic newEpic);
+    void upgradeEpic(Epic epic);
 
     /**
      * Обновление подзадачи.
      */
-    void enterNewSubtask(long numberID, Subtask subtask, Epic epic);
+    void upgradeSubtask(Subtask subtask);
 
     /**
      * Удаление задачи по идентификатору.
@@ -95,7 +109,7 @@ public interface TaskManager {
     /**
      * Удаление подзадачи по идентификатору.
      */
-    void deleteSubtaskForID(long numberID, Epic epic);
+    void deleteSubtaskForID(long numberID);
 
     /**
      * Установка статуса для задачи
@@ -110,7 +124,7 @@ public interface TaskManager {
     /**
      * Расчет статуса для эпиков
      */
-    void createStatusForEpic(long numberEpicID);
+    void setStatusForEpics(long numberEpicID);
 
     /**
      * Получаем объект для получения и добавления истории

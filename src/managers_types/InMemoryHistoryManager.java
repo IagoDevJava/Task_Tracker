@@ -10,7 +10,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     /**
      * Возможность хранить историю просмотров задач всех типов.
      */
-    List<Task> historyViewsOfTasks = new ArrayList<>(10);
+    private List<Task> historyViewsOfTasks = new ArrayList<>(10);
 
     /**
      * Добавление задач в историю
@@ -18,7 +18,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void addHistory(Task task) {
         if (historyViewsOfTasks.size() >= 10) {
-            historyViewsOfTasks.remove(historyViewsOfTasks.get(0));
+            historyViewsOfTasks.remove(0);
         }
         historyViewsOfTasks.add(task);
     }

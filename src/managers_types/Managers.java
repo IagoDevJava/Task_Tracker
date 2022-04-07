@@ -2,7 +2,7 @@ package managers_types;
 
 public class Managers {
 
-    static InMemoryHistoryManager getDefaultHistory() {
+    public static InMemoryHistoryManager getDefaultHistory() {
         return new InMemoryHistoryManager();
     }
 

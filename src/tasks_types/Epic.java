@@ -1,15 +1,22 @@
 package tasks_types;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class Epic extends Task {
 
-    public HashMap<Long, Subtask> allSubtasksOfEpic;
+    private ArrayList<Long> idsOfSubtasksEpic = new ArrayList<>();
 
     public Epic(String nameTask, String description) {
         super(nameTask, description);
-        allSubtasksOfEpic = new HashMap<>();
+    }
+
+    public ArrayList<Long> getIdsOfSubtasksEpic() {
+        return idsOfSubtasksEpic;
+    }
+
+    public void setIdsOfSubtasksEpic(ArrayList<Long> idsOfSubtasksEpic) {
+        this.idsOfSubtasksEpic = idsOfSubtasksEpic;
     }
 
     @Override
@@ -18,20 +25,21 @@ public class Epic extends Task {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Epic epic = (Epic) o;
-        return Objects.equals(allSubtasksOfEpic, epic.allSubtasksOfEpic);
+        return Objects.equals(idsOfSubtasksEpic, epic.idsOfSubtasksEpic);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), allSubtasksOfEpic);
+        return Objects.hash(super.hashCode(), idsOfSubtasksEpic);
     }
 
     @Override
     public String toString() {
-        return "Epic{"
-                + "Name epic: " + getNameTask()
-                + ", Description: " + getDescription()
-                + ", Status: " + getStatus()
-                + "}";
+        return "Epic{" +
+                "nameTask='" + super.getNameTask() + '\'' +
+                ", description='" + super.getDescription() + '\'' +
+                ", status=" + super.getStatus() +
+                ", numberId=" + super.getNumberId() +
+                '}';
     }
 }
