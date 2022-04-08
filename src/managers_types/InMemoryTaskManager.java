@@ -194,16 +194,6 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void upgradeSubtask(Subtask subtask) {
         long numberId = subtask.getNumberId();
-        // Написал и понял, что заменяю ID саму на себя.
-        // В эпике храню список ID подзадач (private ArrayList<Long> idsOfSubtasksEpic = new ArrayList<>();).
-        // Как будто не надо ничего менять в таком случае?
-//        Epic epic = allEpicTasks.get(subtask.getMyEpicID());
-//        for (Long aLong : epic.getIdsOfSubtasksEpic()) {
-//            if (numberId == aLong) {
-//                epic.getIdsOfSubtasksEpic().remove(aLong);
-//                epic.getIdsOfSubtasksEpic().add(numberId);
-//            }
-//        }
         if (allSubtasks.containsKey(numberId)) {
             allSubtasks.put(numberId, subtask);
 
@@ -216,8 +206,9 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void deleteTaskForID(long numberId) {
-        if (!allTasks.isEmpty() && allTasks.get(numberId) != null) {
-            getHistoryManager().getHistory().remove(allTasks.get(numberId));
+        Task task = allTasks.get(numberId);
+        if (task != null) {
+            getHistoryManager().getHistory().remove(task);
             allTasks.remove(numberId);
         }
     }
@@ -227,8 +218,8 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void deleteEpicForID(long numberId) {
-        if (!allEpicTasks.isEmpty() && allEpicTasks.get(numberId) != null) {
-            // allEpicTasks.get(numberID).getIdsOfSubtasksEpic().clear(); // а это как раз сборщик мусора удалит?
+        Epic epic = allEpicTasks.get(numberId);
+        if (epic != null) {
             for (Long aLong : allSubtasks.keySet()) {
                 if (numberId == allSubtasks.get(aLong).getMyEpicID()) {
                     allSubtasks.remove(aLong);
@@ -243,8 +234,8 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void deleteSubtaskForID(long numberId) {
-        if (!allSubtasks.isEmpty() && allSubtasks.get(numberId) != null) {
-            Subtask subtask = allSubtasks.get(numberId);
+        Subtask subtask = allSubtasks.get(numberId);
+        if (subtask != null) {
             Epic epic = allEpicTasks.get(subtask.getMyEpicID());
             epic.getIdsOfSubtasksEpic().remove(numberId);
             allSubtasks.remove(numberId);
