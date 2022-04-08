@@ -42,7 +42,7 @@ public class Task {
         return numberId;
     }
 
-    public void setNumberId(long numberId) {
+    public void numberId(long numberId) {
         this.numberId = numberId;
     }
 
@@ -51,7 +51,10 @@ public class Task {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return numberId == task.numberId && Objects.equals(nameTask, task.nameTask) && status == task.status && Objects.equals(description, task.description);
+        return numberId == task.numberId
+                && Objects.equals(nameTask, task.nameTask)
+                && status == task.status
+                && Objects.equals(description, task.description);
     }
 
     @Override

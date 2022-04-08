@@ -26,7 +26,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public long createTask(Task task) {
         long thisID = creatingID();
-        task.setNumberId(thisID);
+        task.numberId(thisID);
         allTasks.put(thisID, task);
         task.setStatus(Status.NEW);
         return thisID;
@@ -38,7 +38,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public long createTask(Epic epic) {
         long thisID = creatingID();
-        epic.setNumberId(thisID);
+        epic.numberId(thisID);
         allEpicTasks.put(thisID, epic);
         epic.setStatus(Status.NEW);
         return thisID;
@@ -52,11 +52,11 @@ public class InMemoryTaskManager implements TaskManager {
         long epicID = subtask.getMyEpicID();
         long thisID = creatingID();
 
-        subtask.setNumberId(thisID);
-        allSubtasks.put(thisID, subtask);
-        subtask.setStatus(Status.NEW);
-
         if (allEpicTasks.containsKey(epicID)) {
+            subtask.numberId(thisID);
+            allSubtasks.put(thisID, subtask);
+            subtask.setStatus(Status.NEW);
+
             Epic epic = allEpicTasks.get(epicID);
             epic.getIdsOfSubtasksEpic().add(thisID);
         }
@@ -112,39 +112,58 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void clearListOfSubtask() {
         allSubtasks.clear();
+        for (Long aLong : allEpicTasks.keySet()) {
+            allEpicTasks.get(aLong).getIdsOfSubtasksEpic().clear();
+            setStatusForEpics(aLong);
+        }
     }
 
     /**
      * Получение задачи по идентификатору.
      */
     @Override
-    public Task getTaskByID(long numberID) {
-        if (allTasks.isEmpty() && allTasks.get(numberID) == null) {
+    public Task getTaskByID(long numberId) {
+        Task task = allTasks.get(numberId);
+        if (!allTasks.containsKey(numberId) && task == null) {
             System.out.println("Задачи с таким ID нет в списке.");
         }
-        return allTasks.get(numberID);
+
+        if (allTasks.containsKey(numberId)) {
+            getHistoryManager().addHistory(task);
+        }
+        return task;
     }
 
     /**
      * Получение эпика по идентификатору.
      */
     @Override
-    public Epic getEpicByID(long numberID) {
-        if (allEpicTasks.isEmpty() && allEpicTasks.get(numberID) == null) {
+    public Epic getEpicByID(long numberId) {
+        Epic epic = allEpicTasks.get(numberId);
+        if (!allEpicTasks.containsKey(numberId) && epic == null) {
             System.out.println("Задачи с таким ID нет в списке.");
         }
-        return allEpicTasks.get(numberID);
+
+        if (allEpicTasks.containsKey(numberId)) {
+            getHistoryManager().addHistory(epic);
+        }
+        return epic;
     }
 
     /**
      * Получение подзадачи по идентификатору.
      */
     @Override
-    public Subtask getSubtaskByID(long numberID) {
-        if (allSubtasks.isEmpty() && allSubtasks.get(numberID) == null) {
+    public Subtask getSubtaskByID(long numberId) {
+        Subtask subtask = allSubtasks.get(numberId);
+        if (!allSubtasks.containsKey(numberId) && subtask == null) {
             System.out.println("Задачи с таким ID нет в списке.");
         }
-        return allSubtasks.get(numberID);
+
+        if (allSubtasks.containsKey(numberId)) {
+            getHistoryManager().addHistory(subtask);
+        }
+        return subtask;
     }
 
     /**
@@ -175,8 +194,19 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void upgradeSubtask(Subtask subtask) {
         long numberId = subtask.getNumberId();
+        // Написал и понял, что заменяю ID саму на себя.
+        // В эпике храню список ID подзадач (private ArrayList<Long> idsOfSubtasksEpic = new ArrayList<>();).
+        // Как будто не надо ничего менять в таком случае?
+//        Epic epic = allEpicTasks.get(subtask.getMyEpicID());
+//        for (Long aLong : epic.getIdsOfSubtasksEpic()) {
+//            if (numberId == aLong) {
+//                epic.getIdsOfSubtasksEpic().remove(aLong);
+//                epic.getIdsOfSubtasksEpic().add(numberId);
+//            }
+//        }
         if (allSubtasks.containsKey(numberId)) {
             allSubtasks.put(numberId, subtask);
+
             setStatusForEpics(subtask.getMyEpicID());
         }
     }
@@ -185,9 +215,10 @@ public class InMemoryTaskManager implements TaskManager {
      * Удаление задачи по идентификатору.
      */
     @Override
-    public void deleteTaskForID(long numberID) {
-        if (!allTasks.isEmpty() && allTasks.get(numberID) != null) {
-            allTasks.remove(numberID);
+    public void deleteTaskForID(long numberId) {
+        if (!allTasks.isEmpty() && allTasks.get(numberId) != null) {
+            getHistoryManager().getHistory().remove(allTasks.get(numberId));
+            allTasks.remove(numberId);
         }
     }
 
@@ -195,10 +226,15 @@ public class InMemoryTaskManager implements TaskManager {
      * Удаление эпика по идентификатору.
      */
     @Override
-    public void deleteEpicForID(long numberID) {
-        if (!allEpicTasks.isEmpty() && allEpicTasks.get(numberID) != null) {
-            allEpicTasks.remove(numberID);
-            allEpicTasks.get(numberID).getIdsOfSubtasksEpic().clear();
+    public void deleteEpicForID(long numberId) {
+        if (!allEpicTasks.isEmpty() && allEpicTasks.get(numberId) != null) {
+            // allEpicTasks.get(numberID).getIdsOfSubtasksEpic().clear(); // а это как раз сборщик мусора удалит?
+            for (Long aLong : allSubtasks.keySet()) {
+                if (numberId == allSubtasks.get(aLong).getMyEpicID()) {
+                    allSubtasks.remove(aLong);
+                }
+            }
+            allEpicTasks.remove(numberId);
         }
     }
 
@@ -206,9 +242,13 @@ public class InMemoryTaskManager implements TaskManager {
      * Удаление подзадачи по идентификатору.
      */
     @Override
-    public void deleteSubtaskForID(long numberID) {
-        if (!allSubtasks.isEmpty() && allSubtasks.get(numberID) != null) {
-            allSubtasks.remove(numberID);
+    public void deleteSubtaskForID(long numberId) {
+        if (!allSubtasks.isEmpty() && allSubtasks.get(numberId) != null) {
+            Subtask subtask = allSubtasks.get(numberId);
+            Epic epic = allEpicTasks.get(subtask.getMyEpicID());
+            epic.getIdsOfSubtasksEpic().remove(numberId);
+            allSubtasks.remove(numberId);
+
         }
     }
 
@@ -220,7 +260,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (!(task instanceof Epic)) {
             task.setStatus(status);
             long thisID = creatingID();
-            task.setNumberId(thisID);
+            task.numberId(thisID);
             allTasks.put(thisID, task);
         }
         return task;
@@ -233,7 +273,7 @@ public class InMemoryTaskManager implements TaskManager {
     public Subtask setStatusForSubtask(Subtask subtask, Status status) {
         subtask.setStatus(status);
         long thisID = creatingID();
-        subtask.setNumberId(thisID);
+        subtask.numberId(thisID);
         allSubtasks.put(thisID, subtask);
 
         setStatusForEpics(subtask.getMyEpicID());
@@ -246,8 +286,8 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void setStatusForEpics(long numberEpicID) {
         boolean isStatus = true;
-        Epic thisEpic = allEpicTasks.get(numberEpicID); //Создал для улучшения читабельности кода
 
+        Epic thisEpic = allEpicTasks.get(numberEpicID);
         for (Long aLong : thisEpic.getIdsOfSubtasksEpic()) {
             if (allSubtasks.get(aLong).getStatus().equals(Status.DONE)) {
                 isStatus = false;
@@ -264,7 +304,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         long thisID = creatingID();
-        allEpicTasks.get(numberEpicID).setNumberId(thisID);
+        allEpicTasks.get(numberEpicID).numberId(thisID);
         allEpicTasks.put(thisID, thisEpic);
     }
 
@@ -288,7 +328,11 @@ public class InMemoryTaskManager implements TaskManager {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         InMemoryTaskManager that = (InMemoryTaskManager) o;
-        return createdID == that.createdID && Objects.equals(historyManager, that.historyManager) && Objects.equals(allTasks, that.allTasks) && Objects.equals(allEpicTasks, that.allEpicTasks) && Objects.equals(allSubtasks, that.allSubtasks);
+        return createdID == that.createdID
+                && Objects.equals(historyManager, that.historyManager)
+                && Objects.equals(allTasks, that.allTasks)
+                && Objects.equals(allEpicTasks, that.allEpicTasks)
+                && Objects.equals(allSubtasks, that.allSubtasks);
     }
 
     @Override

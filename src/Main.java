@@ -1,3 +1,4 @@
+import managers_types.HistoryManager;
 import managers_types.Managers;
 import managers_types.TaskManager;
 import tasks_types.Epic;
@@ -33,7 +34,7 @@ public class Main {
         System.out.println("Subtasks:");
         System.out.println(manager.getListOfSubtask());
 
-        System.out.println("______________________________");
+        System.out.println("Change Status");
 
         manager.setStatusForSubtask(s1, Status.DONE);
         manager.setStatusForSubtask(s2, Status.IN_PROGRESS);
@@ -41,12 +42,16 @@ public class Main {
         System.out.println(manager.getListOfSubtask());
         System.out.println(manager.getListOfEpic());
 
-        System.out.println("___________________________");
+        System.out.println("Delete tasks and get them");
 
         manager.deleteTaskForID(t1.getNumberId());
         manager.deleteSubtaskForID(s3.getNumberId());
         System.out.println(manager.getListOfTask());
         System.out.println(manager.getListOfSubtask());
 
+        System.out.println("Get history");
+        manager.getTaskByID(t1.getNumberId());
+        manager.getTaskByID(t2.getNumberId());
+        System.out.println(manager.getHistoryManager());
     }
 }
