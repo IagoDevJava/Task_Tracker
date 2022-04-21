@@ -1,5 +1,8 @@
 package managers_types;
 
+import interfaces_and_utilities.HistoryManager;
+import interfaces_and_utilities.Managers;
+import interfaces_and_utilities.TaskManager;
 import tasks_types.Epic;
 import tasks_types.Status;
 import tasks_types.Subtask;
@@ -210,6 +213,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (task != null) {
             getHistoryManager().getHistory().remove(task);
             allTasks.remove(numberId);
+            getHistoryManager().remove(numberId);
         }
     }
 
@@ -226,6 +230,7 @@ public class InMemoryTaskManager implements TaskManager {
                 }
             }
             allEpicTasks.remove(numberId);
+            getHistoryManager().remove(numberId);
         }
     }
 
@@ -239,7 +244,7 @@ public class InMemoryTaskManager implements TaskManager {
             Epic epic = allEpicTasks.get(subtask.getMyEpicID());
             epic.getIdsOfSubtasksEpic().remove(numberId);
             allSubtasks.remove(numberId);
-
+            getHistoryManager().remove(numberId);
         }
     }
 

@@ -1,4 +1,4 @@
-package managers_types;
+package interfaces_and_utilities;
 
 import tasks_types.Epic;
 import tasks_types.Status;

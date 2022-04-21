@@ -1,5 +1,5 @@
-import managers_types.Managers;
-import managers_types.TaskManager;
+import interfaces_and_utilities.Managers;
+import interfaces_and_utilities.TaskManager;
 import tasks_types.Epic;
 import tasks_types.Status;
 import tasks_types.Subtask;
@@ -51,6 +51,16 @@ public class Main {
         System.out.println("Get history");
         manager.getTaskByID(t1.getNumberId());
         manager.getTaskByID(t2.getNumberId());
-        System.out.println(manager.getHistoryManager());
+        manager.getTaskByID(t2.getNumberId());
+        manager.getTaskByID(t2.getNumberId());
+        manager.getTaskByID(t2.getNumberId());
+        manager.getTaskByID(t2.getNumberId());
+        manager.getTaskByID(t2.getNumberId());
+        manager.getTaskByID(t2.getNumberId());
+        manager.getTaskByID(t2.getNumberId());
+        manager.getTaskByID(t2.getNumberId());
+        manager.getTaskByID(t2.getNumberId());
+        manager.getTaskByID(t2.getNumberId());
+        System.out.println(manager.getHistoryManager().getHistory().size());
     }
 }

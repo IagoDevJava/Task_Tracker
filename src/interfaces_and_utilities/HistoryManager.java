@@ -1,4 +1,4 @@
-package managers_types;
+package interfaces_and_utilities;
 
 import tasks_types.Task;
 
@@ -10,6 +10,11 @@ public interface HistoryManager {
      * помечает задачи как просмотренные.
      */
     void addHistory(Task task);
+
+    /**
+     * удаляет задачи из списка просмотренных.
+     */
+    void remove(long id);
 
     /**
      * возвращает список просмотренных задач.

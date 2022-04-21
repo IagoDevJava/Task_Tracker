@@ -1,27 +1,38 @@
 package managers_types;
 
+import interfaces_and_utilities.HistoryManager;
+import my_LinkedList.CustomLinkedList;
+import my_LinkedList.Node;
 import tasks_types.Task;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class InMemoryHistoryManager implements HistoryManager {
+public class InMemoryHistoryManager<T> implements HistoryManager {
 
     /**
      * Возможность хранить историю просмотров задач всех типов.
      */
-    private List<Task> historyViewsOfTasks = new ArrayList<>(10);
+    private CustomLinkedList<Task> historyViewsOfTasks = new CustomLinkedList<>();
 
     /**
      * Добавление задач в историю
      */
     @Override
     public void addHistory(Task task) {
-        if (historyViewsOfTasks.size() >= 10) {
-            historyViewsOfTasks.remove(0);
+        if (historyViewsOfTasks.getSize() >= 10) {
+            historyViewsOfTasks.removeFirst();
         }
-        historyViewsOfTasks.add(task);
+        historyViewsOfTasks.linkLast(task);
+    }
+
+    /**
+     * удаляет задачи из списка просмотренных.
+     */
+    @Override
+    public void remove(long id) {
+        Node requiredNode = historyViewsOfTasks.getNodeValuesByIdNumbers().get(id);
+        historyViewsOfTasks.removeNode(requiredNode);
     }
 
     /**
@@ -29,7 +40,7 @@ public class InMemoryHistoryManager implements HistoryManager {
      */
     @Override
     public List<Task> getHistory() {
-        return historyViewsOfTasks;
+        return historyViewsOfTasks.getTask();
     }
 
     @Override

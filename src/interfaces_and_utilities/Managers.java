@@ -1,4 +1,7 @@
-package managers_types;
+package interfaces_and_utilities;
+
+import managers_types.InMemoryHistoryManager;
+import managers_types.InMemoryTaskManager;
 
 public class Managers {
 
