@@ -1,29 +1,29 @@
 package managers_types;
 
 import interfaces_and_utilities.HistoryManager;
-import my_LinkedList.CustomLinkedList;
-import my_LinkedList.Node;
 import tasks_types.Task;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
-public class InMemoryHistoryManager<T> implements HistoryManager {
+public class InMemoryHistoryManager implements HistoryManager {
 
     /**
-     * Возможность хранить историю просмотров задач всех типов.
+     * Возможность изменить методы LinkedList.
      */
-    private CustomLinkedList<Task> historyViewsOfTasks = new CustomLinkedList<>();
+    private Node head;
+    private Node tail;
+
+    /**
+     * Возможность хранить и получать Node за O(1).
+     */
+    private Map<Long, Node> nodeValuesByIdNumbers = new HashMap<>();
 
     /**
      * Добавление задач в историю
      */
     @Override
-    public void addHistory(Task task) {
-        if (historyViewsOfTasks.getSize() >= 10) {
-            historyViewsOfTasks.removeFirst();
-        }
-        historyViewsOfTasks.linkLast(task);
+    public void add(Task task) {
+        linkLast(task);
     }
 
     /**
@@ -31,8 +31,8 @@ public class InMemoryHistoryManager<T> implements HistoryManager {
      */
     @Override
     public void remove(long id) {
-        Node requiredNode = historyViewsOfTasks.getNodeValuesByIdNumbers().get(id);
-        historyViewsOfTasks.removeNode(requiredNode);
+        Node requiredNode = nodeValuesByIdNumbers.get(id);
+        removeNode(requiredNode);
     }
 
     /**
@@ -40,7 +40,54 @@ public class InMemoryHistoryManager<T> implements HistoryManager {
      */
     @Override
     public List<Task> getHistory() {
-        return historyViewsOfTasks.getTask();
+        return getTask();
+    }
+
+    /**
+     * Замена ссылок и добавление в конец
+     */
+    private void linkLast(Task task) {
+        final Node oldTail = tail;
+        final Node newNode = new Node(oldTail, task, null);
+        tail = newNode;
+        if (oldTail == null) {
+            head = newNode;
+        } else {
+            oldTail.next = newNode;
+        }
+        nodeValuesByIdNumbers.put(task.getNumberId(), newNode);
+    }
+
+    /**
+     * Получение списка истории задач
+     */
+    private List<Task> getTask() {
+        ArrayList<Task> outputOfTasks = new ArrayList<>();
+        Node node = head;
+        while (node != null) {
+            outputOfTasks.add(node.data);
+            node = node.next;
+        }
+        return outputOfTasks;
+    }
+
+    /**
+     * Удаление ноды, при ссылке на нее черед ID задачи
+     */
+    private void removeNode(Node node) {
+        if (node != null) {
+            final Node nextNode = node.next;
+            final Node prevNode = node.prev;
+
+            if (nextNode == null) {
+                tail = node.prev;
+            } else if (prevNode == null) {
+                head = node.next;
+            } else {
+                node.next = prevNode.next;
+                node.prev = nextNode.prev;
+            }
+        }
     }
 
     @Override
@@ -48,18 +95,32 @@ public class InMemoryHistoryManager<T> implements HistoryManager {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         InMemoryHistoryManager that = (InMemoryHistoryManager) o;
-        return Objects.equals(historyViewsOfTasks, that.historyViewsOfTasks);
+        return Objects.equals(head, that.head) && Objects.equals(tail, that.tail) && Objects.equals(nodeValuesByIdNumbers, that.nodeValuesByIdNumbers);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(historyViewsOfTasks);
+        return Objects.hash(head, tail, nodeValuesByIdNumbers);
     }
 
     @Override
     public String toString() {
         return "InMemoryHistoryManager{" +
-                "historyViewsOfTasks=" + historyViewsOfTasks +
+                "head=" + head +
+                ", tail=" + tail +
+                ", nodeValuesByIdNumbers=" + nodeValuesByIdNumbers +
                 '}';
+    }
+
+    static class Node {
+        private Task data;
+        private Node next;
+        private Node prev;
+
+        public Node(Node prev, Task data, Node next) {
+            this.data = data;
+            this.next = next;
+            this.prev = prev;
+        }
     }
 }

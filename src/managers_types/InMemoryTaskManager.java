@@ -132,7 +132,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         if (allTasks.containsKey(numberId)) {
-            getHistoryManager().addHistory(task);
+            getHistoryManager().add(task);
         }
         return task;
     }
@@ -148,7 +148,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         if (allEpicTasks.containsKey(numberId)) {
-            getHistoryManager().addHistory(epic);
+            getHistoryManager().add(epic);
         }
         return epic;
     }
@@ -164,7 +164,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         if (allSubtasks.containsKey(numberId)) {
-            getHistoryManager().addHistory(subtask);
+            getHistoryManager().add(subtask);
         }
         return subtask;
     }

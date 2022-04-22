@@ -9,7 +9,7 @@ public interface HistoryManager {
     /**
      * помечает задачи как просмотренные.
      */
-    void addHistory(Task task);
+    void add(Task task);
 
     /**
      * удаляет задачи из списка просмотренных.
