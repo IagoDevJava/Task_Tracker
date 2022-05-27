@@ -33,13 +33,16 @@ public class Epic extends Task {
         return Objects.hash(super.hashCode(), idsOfSubtasksEpic);
     }
 
+    public TypesTasks getType() {
+        return TypesTasks.EPIC;
+    }
+
     @Override
     public String toString() {
-        return "Epic{" +
-                "nameTask='" + super.getNameTask() + '\'' +
-                ", description='" + super.getDescription() + '\'' +
-                ", status=" + super.getStatus() +
-                ", numberId=" + super.getNumberId() +
-                '}';
+        return super.getNumberId() + "," +
+                getType() + "," +
+                super.getNameTask() + "," +
+                super.getStatus() + "," +
+                super.getDescription();
     }
 }

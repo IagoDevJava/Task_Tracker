@@ -1,5 +1,6 @@
 package managers_types;
 
+import exceptions.ManagerSaveException;
 import interfaces_and_utilities.HistoryManager;
 import interfaces_and_utilities.Managers;
 import interfaces_and_utilities.TaskManager;
@@ -14,20 +15,25 @@ import java.util.Objects;
 
 public class InMemoryTaskManager implements TaskManager {
 
-    private final HistoryManager historyManager = Managers.getDefaultHistory();
+    /**
+     * История задач.
+     */
+    protected final HistoryManager historyManager = Managers.getDefaultHistory();
+
     /**
      * Возможность хранить задачи всех типов.
      */
-    private final HashMap<Long, Task> allTasks = new HashMap<>();
-    private final HashMap<Long, Epic> allEpicTasks = new HashMap<>();
-    private final HashMap<Long, Subtask> allSubtasks = new HashMap<>();
-    private long createdID = 0L;
+    protected final HashMap<Long, Task> allTasks = new HashMap<>();
+    protected final HashMap<Long, Epic> allEpicTasks = new HashMap<>();
+    protected final HashMap<Long, Subtask> allSubtasks = new HashMap<>();
+
+    protected long createdID = 0L;
 
     /**
      * Создание задачи. Сам объект должен передаваться в качестве параметра.
      */
     @Override
-    public long createTask(Task task) {
+    public long createTask(Task task) throws ManagerSaveException {
         long thisID = creatingID();
         task.numberId(thisID);
         allTasks.put(thisID, task);
@@ -39,7 +45,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Создание эпика. Сам объект должен передаваться в качестве параметра.
      */
     @Override
-    public long createTask(Epic epic) {
+    public long createTask(Epic epic) throws ManagerSaveException {
         long thisID = creatingID();
         epic.numberId(thisID);
         allEpicTasks.put(thisID, epic);
@@ -51,10 +57,9 @@ public class InMemoryTaskManager implements TaskManager {
      * Создание подзадачи. Сам объект должен передаваться в качестве параметра.
      */
     @Override
-    public long createTask(Subtask subtask) {
-        long epicID = subtask.getMyEpicID();
+    public long createTask(Subtask subtask) throws ManagerSaveException {
         long thisID = creatingID();
-
+        long epicID = subtask.getMyEpicID();
         if (allEpicTasks.containsKey(epicID)) {
             subtask.numberId(thisID);
             allSubtasks.put(thisID, subtask);
@@ -62,9 +67,8 @@ public class InMemoryTaskManager implements TaskManager {
 
             Epic epic = allEpicTasks.get(epicID);
             epic.getIdsOfSubtasksEpic().add(thisID);
+            setStatusForEpics(epicID);
         }
-
-        setStatusForEpics(epicID);
         return thisID;
     }
 
@@ -96,7 +100,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Удаление всех задач.
      */
     @Override
-    public void clearListOfTask() {
+    public void clearListOfTask() throws ManagerSaveException {
         allTasks.clear();
     }
 
@@ -104,7 +108,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Удаление всех эпиков.
      */
     @Override
-    public void clearListOfEpic() {
+    public void clearListOfEpic() throws ManagerSaveException {
         allEpicTasks.clear();
         allSubtasks.clear();
     }
@@ -113,7 +117,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Удаление всех подзадач.
      */
     @Override
-    public void clearListOfSubtask() {
+    public void clearListOfSubtask() throws ManagerSaveException {
         allSubtasks.clear();
         for (Long aLong : allEpicTasks.keySet()) {
             allEpicTasks.get(aLong).getIdsOfSubtasksEpic().clear();
@@ -125,7 +129,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Получение задачи по идентификатору.
      */
     @Override
-    public Task getTaskByID(long numberId) {
+    public Task getTaskByID(long numberId) throws ManagerSaveException {
         Task task = allTasks.get(numberId);
         if (!allTasks.containsKey(numberId) && task == null) {
             System.out.println("Задачи с таким ID нет в списке.");
@@ -173,7 +177,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Обновление задачи.
      */
     @Override
-    public void upgradeTask(Task task) {
+    public void upgradeTask(Task task) throws ManagerSaveException {
         long numberId = task.getNumberId();
         if (allTasks.containsKey(numberId)) {
             allTasks.put(numberId, task);
@@ -184,7 +188,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Обновление эпика.
      */
     @Override
-    public void upgradeEpic(Epic epic) {
+    public void upgradeEpic(Epic epic) throws ManagerSaveException {
         long numberId = epic.getNumberId();
         if (allEpicTasks.containsKey(numberId)) {
             allEpicTasks.put(numberId, epic);
@@ -195,7 +199,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Обновление подзадачи.
      */
     @Override
-    public void upgradeSubtask(Subtask subtask) {
+    public void upgradeSubtask(Subtask subtask) throws ManagerSaveException {
         long numberId = subtask.getNumberId();
         if (allSubtasks.containsKey(numberId)) {
             allSubtasks.put(numberId, subtask);
@@ -208,7 +212,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Удаление задачи по идентификатору.
      */
     @Override
-    public void deleteTaskForID(long numberId) {
+    public void deleteTaskForID(long numberId) throws ManagerSaveException {
         Task task = allTasks.get(numberId);
         if (task != null) {
             getHistoryManager().getHistory().remove(task);
@@ -221,7 +225,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Удаление эпика по идентификатору.
      */
     @Override
-    public void deleteEpicForID(long numberId) {
+    public void deleteEpicForID(long numberId) throws ManagerSaveException {
         Epic epic = allEpicTasks.get(numberId);
         if (epic != null) {
             for (Long aLong : allSubtasks.keySet()) {
@@ -238,7 +242,7 @@ public class InMemoryTaskManager implements TaskManager {
      * Удаление подзадачи по идентификатору.
      */
     @Override
-    public void deleteSubtaskForID(long numberId) {
+    public void deleteSubtaskForID(long numberId) throws ManagerSaveException {
         Subtask subtask = allSubtasks.get(numberId);
         if (subtask != null) {
             Epic epic = allEpicTasks.get(subtask.getMyEpicID());
@@ -252,12 +256,12 @@ public class InMemoryTaskManager implements TaskManager {
      * Установка статуса для задачи
      */
     @Override
-    public Task setStatusForTask(Task task, Status status) {
+    public Task setStatusForTask(Task task, Status status) throws ManagerSaveException {
         if (!(task instanceof Epic)) {
-            task.setStatus(status);
-            long thisID = creatingID();
-            task.numberId(thisID);
-            allTasks.put(thisID, task);
+            Task t = new Task(task.getNameTask(), task.getDescription());
+            long thisID = createTask(t);
+            t.setStatus(status);
+            allTasks.put(thisID, t);
         }
         return task;
     }
@@ -266,12 +270,12 @@ public class InMemoryTaskManager implements TaskManager {
      * Установка статуса для подзадачи
      */
     @Override
-    public Subtask setStatusForSubtask(Subtask subtask, Status status) {
-        subtask.setStatus(status);
-        long thisID = creatingID();
-        subtask.numberId(thisID);
-        allSubtasks.put(thisID, subtask);
-
+    public Subtask setStatusForSubtask(Subtask subtask, Status status) throws ManagerSaveException {
+        Subtask st = new Subtask(subtask.getNameTask(), subtask.getDescription(), subtask.getMyEpicID());
+        long thisID = createTask(st);
+        ;
+        st.setStatus(status);
+        allSubtasks.put(thisID, st);
         setStatusForEpics(subtask.getMyEpicID());
         return subtask;
     }
@@ -280,28 +284,27 @@ public class InMemoryTaskManager implements TaskManager {
      * Установка статуса для эпиков
      */
     @Override
-    public void setStatusForEpics(long numberEpicID) {
+    public void setStatusForEpics(long numberEpicID) throws ManagerSaveException {
         boolean isStatus = true;
 
         Epic thisEpic = allEpicTasks.get(numberEpicID);
-        for (Long aLong : thisEpic.getIdsOfSubtasksEpic()) {
-            if (allSubtasks.get(aLong).getStatus().equals(Status.DONE)) {
-                isStatus = false;
-            } else if (allSubtasks.get(aLong).getStatus().equals(Status.IN_PROGRESS)) {
-                isStatus = true;
-                break;
+        if (thisEpic != null) {
+            for (Long aLong : thisEpic.getIdsOfSubtasksEpic()) {
+                isStatus = !allSubtasks.get(aLong).getStatus().equals(Status.IN_PROGRESS)
+                        && !allSubtasks.get(aLong).getStatus().equals(Status.NEW);
             }
         }
 
-        if (isStatus) {
-            thisEpic.setStatus(Status.IN_PROGRESS);
+        Epic e = new Epic(allEpicTasks.get(numberEpicID).getNameTask(), allEpicTasks.get(numberEpicID).getDescription());
+        long thisID = createTask(e);
+        if (!isStatus) {
+            e.setStatus(Status.IN_PROGRESS);
         } else {
-            thisEpic.setStatus(Status.DONE);
+            if (thisEpic != null) {
+                e.setStatus(Status.DONE);
+            }
         }
-
-        long thisID = creatingID();
-        allEpicTasks.get(numberEpicID).numberId(thisID);
-        allEpicTasks.put(thisID, thisEpic);
+        allEpicTasks.put(thisID, e);
     }
 
     /**

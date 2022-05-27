@@ -33,14 +33,17 @@ public class Subtask extends Task {
         return Objects.hash(super.hashCode(), myEpicID);
     }
 
+    public TypesTasks getType() {
+        return TypesTasks.SUBTASK;
+    }
+
     @Override
     public String toString() {
-        return "Subtask{" +
-                "nameTask='" + super.getNameTask() + '\'' +
-                ", description='" + super.getDescription() + '\'' +
-                ", status=" + super.getStatus() +
-                ", numberId=" + super.getNumberId() +
-                ", myEpicID=" + myEpicID +
-                '}';
+        return super.getNumberId() + "," +
+                getType() + "," +
+                super.getNameTask() + "," +
+                super.getStatus() + "," +
+                super.getDescription() + "," +
+                myEpicID;
     }
 }

@@ -1,5 +1,6 @@
 package interfaces_and_utilities;
 
+import exceptions.ManagerSaveException;
 import tasks_types.Epic;
 import tasks_types.Status;
 import tasks_types.Subtask;
@@ -14,21 +15,21 @@ public interface TaskManager {
      *
      * @return
      */
-    long createTask(Task task);
+    long createTask(Task task) throws ManagerSaveException;
 
     /**
      * Создание эпика. Сам объект должен передаваться в качестве параметра.
      *
      * @return
      */
-    long createTask(Epic epic);
+    long createTask(Epic epic) throws ManagerSaveException;
 
     /**
      * Создание подзадачи. Сам объект должен передаваться в качестве параметра.
      *
      * @return
      */
-    long createTask(Subtask subtask);
+    long createTask(Subtask subtask) throws ManagerSaveException;
 
     /**
      * Получение списка всех задач.
@@ -48,24 +49,24 @@ public interface TaskManager {
     /**
      * Удаление всех задач.
      */
-    void clearListOfTask();
+    void clearListOfTask() throws ManagerSaveException;
 
     /**
      * Удаление всех эпиков.
      */
-    void clearListOfEpic();
+    void clearListOfEpic() throws ManagerSaveException;
 
     /**
      * Удаление всех подзадач.
      */
-    void clearListOfSubtask();
+    void clearListOfSubtask() throws ManagerSaveException;
 
     /**
      * Получение задачи по идентификатору.
      *
      * @return
      */
-    Task getTaskByID(long numberID);
+    Task getTaskByID(long numberID) throws ManagerSaveException;
 
     /**
      * Получение эпика по идентификатору.
@@ -84,47 +85,47 @@ public interface TaskManager {
     /**
      * Обновление задачи.
      */
-    void upgradeTask(Task task);
+    void upgradeTask(Task task) throws ManagerSaveException;
 
     /**
      * Обновление эпика.
      */
-    void upgradeEpic(Epic epic);
+    void upgradeEpic(Epic epic) throws ManagerSaveException;
 
     /**
      * Обновление подзадачи.
      */
-    void upgradeSubtask(Subtask subtask);
+    void upgradeSubtask(Subtask subtask) throws ManagerSaveException;
 
     /**
      * Удаление задачи по идентификатору.
      */
-    void deleteTaskForID(long numberID);
+    void deleteTaskForID(long numberID) throws ManagerSaveException;
 
     /**
      * Удаление эпика по идентификатору.
      */
-    void deleteEpicForID(long numberID);
+    void deleteEpicForID(long numberID) throws ManagerSaveException;
 
     /**
      * Удаление подзадачи по идентификатору.
      */
-    void deleteSubtaskForID(long numberID);
+    void deleteSubtaskForID(long numberID) throws ManagerSaveException;
 
     /**
      * Установка статуса для задачи
      */
-    Task setStatusForTask(Task task, Status status);
+    Task setStatusForTask(Task task, Status status) throws ManagerSaveException;
 
     /**
      * Установка статуса для подзадачи
      */
-    Subtask setStatusForSubtask(Subtask subtask, Status status);
+    Subtask setStatusForSubtask(Subtask subtask, Status status) throws ManagerSaveException;
 
     /**
      * Расчет статуса для эпиков
      */
-    void setStatusForEpics(long numberEpicID);
+    void setStatusForEpics(long numberEpicID) throws ManagerSaveException;
 
     /**
      * Получаем объект для получения и добавления истории

@@ -16,7 +16,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     /**
      * Возможность хранить и получать Node за O(1).
      */
-    private Map<Long, Node> nodeValuesByIdNumbers = new HashMap<>();
+    protected Map<Long, Node> nodeValuesByIdNumbers = new HashMap<>();
 
     /**
      * Добавление задач в историю
