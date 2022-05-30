@@ -15,11 +15,9 @@ import java.util.Map;
 import static java.lang.Integer.parseInt;
 import static java.lang.Integer.valueOf;
 
-public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
+public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private File file;
-
-    TaskManager manager = Managers.getDefaultTaskManager();
 
     public FileBackedTasksManager(File file) {
         this.file = file;
@@ -51,7 +49,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             bufferedWriter.append(toString(historyManager));
 
         } catch (IOException e) {
-            throw new ManagerSaveException("Ошибка в файле: c://Users/egoro/dev/java-sprint2-hw/file.csv");
+            throw new ManagerSaveException("Ошибка в файле: " + file.getAbsolutePath());
         }
     }
 
@@ -65,7 +63,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     /**
      * Получение строки с историей
      */
-    static String toString(HistoryManager historyManager) {
+    private static String toString(HistoryManager historyManager) {
         StringBuilder sb = new StringBuilder("");
         for (Task task : historyManager.getHistory()) {
             sb.append(task.getNumberId()).append(",");
@@ -106,6 +104,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
                         break;
                     case SUBTASK:
                         allSubtasks.put(numberId, (Subtask) getTaskFromString(line));
+                        if (allEpicTasks.containsKey(((Subtask) getTaskFromString(line)).getMyEpicID())) {
+                            Epic epic = allEpicTasks.get(((Subtask) getTaskFromString(line)).getMyEpicID());
+                            epic.getIdsOfSubtasksEpic().add(numberId);
+                        }
                         break;
                 }
                 if (maxId < numberId) {
@@ -117,7 +119,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             line = bufferedReader.readLine();
             getHistoryFromString(line);
         } catch (IOException e) {
-            throw new ManagerSaveException("Ошибка в файле: c://Users/egoro/dev/java-sprint2-hw/file.csv");
+            throw new ManagerSaveException("Ошибка в файле: " + file.getAbsolutePath());
         }
         createdID = maxId;
     }
@@ -277,43 +279,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     }
 
     @Override
-    public ArrayList<Task> getListOfTask() {
-        return super.getListOfTask();
-    }
-
-    @Override
-    public ArrayList<Task> getListOfEpic() {
-        return super.getListOfEpic();
-    }
-
-    @Override
-    public ArrayList<Task> getListOfSubtask() {
-        return super.getListOfSubtask();
-    }
-
-    @Override
     public Task getTaskByID(long numberId) throws ManagerSaveException {
         Task t = super.getTaskByID(numberId);
         save();
         return t;
     }
 
-    @Override
-    public Epic getEpicByID(long numberId) {
-        return super.getEpicByID(numberId);
-    }
-
-    @Override
-    public Subtask getSubtaskByID(long numberId) {
-        return super.getSubtaskByID(numberId);
-    }
-
-    @Override
-    public HistoryManager getHistoryManager() {
-        return super.getHistoryManager();
-    }
-
-    public static void main(String[] args) throws ManagerSaveException {
+    public static void main(String[] args) {
 
         Task t1 = new Task("Task 1", "DescriptionTask 1");
         Epic e1 = new Epic("Epic 1", "DescriptionEpic 1");
@@ -345,11 +317,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         System.out.println("subtasks - " + fileBackedTasksManager.getListOfSubtask());
         System.out.println("epics - " + fileBackedTasksManager.getListOfEpic());
 
-//        System.out.println("Delete tasks and get them");
-//        fileBackedTasksManager.deleteTaskForID(t1.getNumberId());
-//        System.out.println(fileBackedTasksManager.getListOfTask());
-//        System.out.println(fileBackedTasksManager.getListOfSubtask());
-
         System.out.println("Get history");
         fileBackedTasksManager.getTaskByID(t1.getNumberId());
         fileBackedTasksManager.getEpicByID(12);
@@ -358,7 +325,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
         FileBackedTasksManager.loadFromFile(file);
 
-        // TODO + сравниваем списки всех задач, подзадач, эпиков и истории в обоих менеджерах
+        //сравниваем списки всех задач, подзадач, эпиков и истории в обоих менеджерах
         Task t1m = new Task("Task 1", "DescriptionTask 1");
         Epic e1m = new Epic("Epic 1", "DescriptionEpic 1");
         Subtask s1m = new Subtask("Subtask 1", "DescriptionSubtask 1", 2);
