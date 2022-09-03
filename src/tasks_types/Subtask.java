@@ -1,22 +1,76 @@
 package tasks_types;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Subtask extends Task {
 
     private long myEpicID;
 
+    public Subtask(String nameTask, String description, String startDateTime,
+                   int hoursDuration, int minutesDuration, long myEpicID) {
+        super(nameTask, description, startDateTime, hoursDuration, minutesDuration);
+        this.myEpicID = myEpicID;
+    }
+
     public Subtask(String nameTask, String description, long myEpicID) {
         super(nameTask, description);
         this.myEpicID = myEpicID;
     }
 
+    /**
+     * получить айди сабтаски
+     */
     public long getMyEpicID() {
         return myEpicID;
     }
 
+    /**
+     * установить айди сабтаски
+     */
     public void setMyEpicID(long myEpicID) {
         this.myEpicID = myEpicID;
+    }
+
+    /**
+     * получить продолжительность сабтаски
+     */
+    @Override
+    public Duration getDuration() {
+        return super.getDuration();
+    }
+
+    /**
+     * установить продолжительность сабтаски
+     */
+    @Override
+    public void setDuration(Duration duration) {
+        super.setDuration(duration);
+    }
+
+    /**
+     * получить время старта сабтаски
+     */
+    @Override
+    public LocalDateTime getStartTime() {
+        return super.getStartTime();
+    }
+
+    /**
+     * установить время старта сабтаски
+     */
+    @Override
+    public void setStartTime(LocalDateTime startTime) {
+        super.setStartTime(startTime);
+    }
+
+    /**
+     * установить продолжительность сабтаски
+     */
+    @Override
+    public LocalDateTime getEndTime() {
+        return super.getEndTime();
     }
 
     @Override
@@ -44,6 +98,9 @@ public class Subtask extends Task {
                 super.getNameTask() + "," +
                 super.getStatus() + "," +
                 super.getDescription() + "," +
-                myEpicID;
+                myEpicID + "," +
+                getStartTime() + "," +
+                getDuration() + "," +
+                getEndTime();
     }
 }

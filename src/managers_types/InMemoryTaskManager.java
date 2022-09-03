@@ -9,9 +9,8 @@ import tasks_types.Status;
 import tasks_types.Subtask;
 import tasks_types.Task;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
+import java.time.LocalDateTime;
+import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
 
@@ -27,6 +26,8 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Long, Epic> allEpicTasks = new HashMap<>();
     protected final HashMap<Long, Subtask> allSubtasks = new HashMap<>();
 
+    protected final Map<LocalDateTime, Task> prioritizedMapOfTasks = new TreeMap<>();
+
     protected long createdID = 0L;
 
     /**
@@ -35,9 +36,10 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public long createTask(Task task) throws ManagerSaveException {
         long thisID = creatingID();
-        task.numberId(thisID);
+        task.setNumberId(thisID);
         allTasks.put(thisID, task);
         task.setStatus(Status.NEW);
+        addTasksInPrioritizedList(task);
         return thisID;
     }
 
@@ -47,9 +49,10 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public long createTask(Epic epic) throws ManagerSaveException {
         long thisID = creatingID();
-        epic.numberId(thisID);
+        epic.setNumberId(thisID);
         allEpicTasks.put(thisID, epic);
         epic.setStatus(Status.NEW);
+
         return thisID;
     }
 
@@ -61,13 +64,15 @@ public class InMemoryTaskManager implements TaskManager {
         long thisID = creatingID();
         long epicID = subtask.getMyEpicID();
         if (allEpicTasks.containsKey(epicID)) {
-            subtask.numberId(thisID);
+            subtask.setNumberId(thisID);
             allSubtasks.put(thisID, subtask);
             subtask.setStatus(Status.NEW);
+            addTasksInPrioritizedList(subtask);
 
-            Epic epic = allEpicTasks.get(epicID);
-            epic.getIdsOfSubtasksEpic().add(thisID);
-            setStatusForEpics(epicID);
+            Epic thisEpic = allEpicTasks.get(epicID);
+            thisEpic.getIdsOfSubtasksEpic().add(thisID);
+            setStatusForEpic(epicID);
+            thisEpic.updateTimeForEpic(this);
         }
         return thisID;
     }
@@ -97,6 +102,17 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
+     * Получение списка задач по приоритетам.
+     */
+    @Override
+    public Set<Task> getPrioritizedTasks() {
+        final Comparator<Task> taskComparator = Comparator.comparing(Task::getStartTime);
+        final Set<Task> prioritizedListOfTasks = new TreeSet<>(taskComparator);
+        prioritizedListOfTasks.addAll(prioritizedMapOfTasks.values());
+        return prioritizedListOfTasks;
+    }
+
+    /**
      * Удаление всех задач.
      */
     @Override
@@ -121,7 +137,7 @@ public class InMemoryTaskManager implements TaskManager {
         allSubtasks.clear();
         for (Long aLong : allEpicTasks.keySet()) {
             allEpicTasks.get(aLong).getIdsOfSubtasksEpic().clear();
-            setStatusForEpics(aLong);
+            setStatusForEpic(aLong);
         }
     }
 
@@ -131,14 +147,18 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task getTaskByID(long numberId) throws ManagerSaveException {
         Task task = allTasks.get(numberId);
-        if (!allTasks.containsKey(numberId) && task == null) {
-            System.out.println("Задачи с таким ID нет в списке.");
-        }
-
         if (allTasks.containsKey(numberId)) {
             getHistoryManager().add(task);
         }
         return task;
+    }
+
+    /**
+     * Получение задачи по идентификатору без истории, для внутреннего пользования.
+     */
+    @Override
+    public Task getTaskByIdWithoutStory(long numberId) throws ManagerSaveException {
+        return allTasks.get(numberId);
     }
 
     /**
@@ -147,14 +167,18 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Epic getEpicByID(long numberId) {
         Epic epic = allEpicTasks.get(numberId);
-        if (!allEpicTasks.containsKey(numberId) && epic == null) {
-            System.out.println("Задачи с таким ID нет в списке.");
-        }
-
         if (allEpicTasks.containsKey(numberId)) {
             getHistoryManager().add(epic);
         }
         return epic;
+    }
+
+    /**
+     * Получение эпика по идентификатору, без истории для внутреннего пользования.
+     */
+    @Override
+    public Epic getEpicByIdWithoutStory(long numberId) {
+        return allEpicTasks.get(numberId);
     }
 
     /**
@@ -163,10 +187,6 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Subtask getSubtaskByID(long numberId) {
         Subtask subtask = allSubtasks.get(numberId);
-        if (!allSubtasks.containsKey(numberId) && subtask == null) {
-            System.out.println("Задачи с таким ID нет в списке.");
-        }
-
         if (allSubtasks.containsKey(numberId)) {
             getHistoryManager().add(subtask);
         }
@@ -174,13 +194,28 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**
+     * Получение подзадачи по идентификатору, без истории для внутреннего пользования.
+     */
+    @Override
+    public Subtask getSubtaskByIdWithoutStory(long numberId) {
+        return allSubtasks.get(numberId);
+    }
+
+    /**
      * Обновление задачи.
      */
     @Override
-    public void upgradeTask(Task task) throws ManagerSaveException {
-        long numberId = task.getNumberId();
-        if (allTasks.containsKey(numberId)) {
-            allTasks.put(numberId, task);
+    public void updateTask(Task task, long numberOldTask) throws ManagerSaveException {
+        final Task savedTask = getTaskByID(numberOldTask);
+        savedTask.setNameTask(task.getNameTask());
+        savedTask.setDescription(task.getDescription());
+        savedTask.setStatus(Status.NEW);
+        savedTask.setStartTime(task.getStartTime());
+        savedTask.setDuration(task.getDuration());
+        savedTask.setEndTime(task.getEndTime());
+
+        if (allTasks.containsKey(savedTask.getNumberId())) {
+            allTasks.put(savedTask.getNumberId(), savedTask);
         }
     }
 
@@ -188,10 +223,13 @@ public class InMemoryTaskManager implements TaskManager {
      * Обновление эпика.
      */
     @Override
-    public void upgradeEpic(Epic epic) throws ManagerSaveException {
-        long numberId = epic.getNumberId();
-        if (allEpicTasks.containsKey(numberId)) {
-            allEpicTasks.put(numberId, epic);
+    public void updateEpic(Epic epic, long numberOldEpic) throws ManagerSaveException {
+        final Epic savedEpic = getEpicByID(numberOldEpic);
+        savedEpic.setNameTask(epic.getNameTask());
+        savedEpic.setDescription(epic.getDescription());
+
+        if (allEpicTasks.containsKey(savedEpic.getNumberId())) {
+            allEpicTasks.put(savedEpic.getNumberId(), savedEpic);
         }
     }
 
@@ -199,12 +237,18 @@ public class InMemoryTaskManager implements TaskManager {
      * Обновление подзадачи.
      */
     @Override
-    public void upgradeSubtask(Subtask subtask) throws ManagerSaveException {
-        long numberId = subtask.getNumberId();
-        if (allSubtasks.containsKey(numberId)) {
-            allSubtasks.put(numberId, subtask);
+    public void updateSubtask(Subtask subtask, long numberOldSubtask) throws ManagerSaveException {
+        final Subtask oldSubtask = getSubtaskByID(numberOldSubtask);
+        oldSubtask.setNumberId(numberOldSubtask);
+        oldSubtask.setNameTask(subtask.getNameTask());
+        oldSubtask.setDescription(subtask.getDescription());
+        oldSubtask.setStatus(Status.NEW);
+        oldSubtask.setStartTime(subtask.getStartTime());
+        oldSubtask.setDuration(subtask.getDuration());
+        oldSubtask.setEndTime(subtask.getEndTime());
 
-            setStatusForEpics(subtask.getMyEpicID());
+        if (allSubtasks.containsKey(oldSubtask.getNumberId())) {
+            allSubtasks.put(oldSubtask.getNumberId(), oldSubtask);
         }
     }
 
@@ -258,10 +302,8 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task setStatusForTask(Task task, Status status) throws ManagerSaveException {
         if (!(task instanceof Epic)) {
-            Task t = new Task(task.getNameTask(), task.getDescription());
-            long thisID = createTask(t);
-            t.setStatus(status);
-            allTasks.put(thisID, t);
+            task.setStatus(status);
+            allTasks.put(task.getNumberId(), task);
         }
         return task;
     }
@@ -271,12 +313,14 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public Subtask setStatusForSubtask(Subtask subtask, Status status) throws ManagerSaveException {
-        Subtask st = new Subtask(subtask.getNameTask(), subtask.getDescription(), subtask.getMyEpicID());
-        long thisID = createTask(st);
-        ;
-        st.setStatus(status);
-        allSubtasks.put(thisID, st);
-        setStatusForEpics(subtask.getMyEpicID());
+        subtask.setStatus(status);
+        allSubtasks.put(subtask.getNumberId(), subtask);
+
+        Epic epic = getEpicByID(subtask.getMyEpicID());
+        epic.getIdsOfSubtasksEpic().add(subtask.getNumberId());
+        historyManager.remove(epic.getNumberId());
+        setStatusForEpic(subtask.getMyEpicID());
+
         return subtask;
     }
 
@@ -284,27 +328,60 @@ public class InMemoryTaskManager implements TaskManager {
      * Установка статуса для эпиков
      */
     @Override
-    public void setStatusForEpics(long numberEpicID) throws ManagerSaveException {
+    public void setStatusForEpic(long numberEpicID) throws ManagerSaveException {
         boolean isStatus = true;
 
-        Epic thisEpic = allEpicTasks.get(numberEpicID);
-        if (thisEpic != null) {
-            for (Long aLong : thisEpic.getIdsOfSubtasksEpic()) {
-                isStatus = !allSubtasks.get(aLong).getStatus().equals(Status.IN_PROGRESS)
-                        && !allSubtasks.get(aLong).getStatus().equals(Status.NEW);
+        Epic newEpic = allEpicTasks.get(numberEpicID);
+        for (Long aLong : newEpic.getIdsOfSubtasksEpic()) {
+            if (allSubtasks.get(aLong).getStatus().equals(Status.IN_PROGRESS)
+                    || allSubtasks.get(aLong).getStatus().equals(Status.NEW)) {
+                isStatus = false;
             }
         }
 
-        Epic e = new Epic(allEpicTasks.get(numberEpicID).getNameTask(), allEpicTasks.get(numberEpicID).getDescription());
-        long thisID = createTask(e);
-        if (!isStatus) {
-            e.setStatus(Status.IN_PROGRESS);
+        if (isStatus) {
+            newEpic.setStatus(Status.DONE);
         } else {
-            if (thisEpic != null) {
-                e.setStatus(Status.DONE);
+            newEpic.setStatus(Status.IN_PROGRESS);
+        }
+
+        allEpicTasks.put(numberEpicID, newEpic);
+    }
+
+    /**
+     * Проверка задач на пересечение во времени.
+     */
+    private Boolean checkTasksForIntersectionsByTime(Task newTask) {
+        boolean checkTaskTime = false;
+        if (!prioritizedMapOfTasks.isEmpty()) {
+            for (Task oldTask : prioritizedMapOfTasks.values()) {
+                if (newTask.getStartTime().isAfter(oldTask.getEndTime())) {
+                    checkTaskTime = true;
+                } else if (newTask.getEndTime().isBefore(oldTask.getStartTime())) {
+                    checkTaskTime = true;
+                } else {
+                    checkTaskTime = false;
+                }
+            }
+        } else {
+            checkTaskTime = true;
+        }
+        return checkTaskTime;
+    }
+
+    /**
+     * Добавление задач в список по временным меткам.
+     */
+    private void addTasksInPrioritizedList(Task task) {
+        if (task instanceof Epic) {
+            prioritizedMapOfTasks.put(task.getStartTime(), task);
+        } else {
+            if (checkTasksForIntersectionsByTime(task)) {
+                prioritizedMapOfTasks.put(task.getStartTime(), task);
+            } else {
+                System.out.println("Измените время выполнения задачи - " + task.getNumberId());
             }
         }
-        allEpicTasks.put(thisID, e);
     }
 
     /**

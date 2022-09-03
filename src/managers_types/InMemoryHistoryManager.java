@@ -8,15 +8,14 @@ import java.util.*;
 public class InMemoryHistoryManager implements HistoryManager {
 
     /**
+     * Возможность хранить и получать Node за O(1).
+     */
+    protected Map<Long, Node> nodeValuesByIdNumbers = new HashMap<>();
+    /**
      * Возможность изменить методы LinkedList.
      */
     private Node head;
     private Node tail;
-
-    /**
-     * Возможность хранить и получать Node за O(1).
-     */
-    protected Map<Long, Node> nodeValuesByIdNumbers = new HashMap<>();
 
     /**
      * Добавление задач в историю
@@ -83,13 +82,18 @@ public class InMemoryHistoryManager implements HistoryManager {
             final Node nextNode = node.next;
             final Node prevNode = node.prev;
 
-            if (nextNode == null) {
+            if (nextNode != null && prevNode != null) { // из середины
+                prevNode.next = node.next;
+                nextNode.prev = node.prev;
+            } else if (nextNode == null && prevNode != null) { // последнюю
                 tail = node.prev;
-            } else if (prevNode == null) {
+                node.prev.next = null;
+            } else if (nextNode != null) { // первую
                 head = node.next;
-            } else {
-                node.next = prevNode.next;
-                node.prev = nextNode.prev;
+                node.next.prev = null;
+            } else { // единственную
+                head = null;
+                tail = null;
             }
             nodeValuesByIdNumbers.remove(node.data.getNumberId());
         }
@@ -118,7 +122,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     static class Node {
-        private Task data;
+        private final Task data;
         private Node next;
         private Node prev;
 

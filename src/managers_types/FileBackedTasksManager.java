@@ -2,17 +2,16 @@ package managers_types;
 
 import exceptions.ManagerSaveException;
 import interfaces_and_utilities.HistoryManager;
-import interfaces_and_utilities.Managers;
-import interfaces_and_utilities.TaskManager;
 import tasks_types.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static java.lang.Integer.parseInt;
 import static java.lang.Integer.valueOf;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
@@ -28,7 +27,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      */
     private void save() throws ManagerSaveException {
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file))) {
-            bufferedWriter.append("id,type,name,status,description,epic\n");
+            bufferedWriter.append("id,type,name,status,description,epic, startTime, duration, endTime\n");
 
             for (Map.Entry<Long, Task> idTaskEntry : allTasks.entrySet()) {
                 bufferedWriter.append(toString(idTaskEntry.getValue()));
@@ -46,7 +45,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
 
             bufferedWriter.newLine();
-            bufferedWriter.append(toString(historyManager));
+            bufferedWriter.append(historyToString(historyManager));
 
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка в файле: " + file.getAbsolutePath());
@@ -63,7 +62,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     /**
      * Получение строки с историей
      */
-    private static String toString(HistoryManager historyManager) {
+    private static String historyToString(HistoryManager historyManager) {
         StringBuilder sb = new StringBuilder("");
         for (Task task : historyManager.getHistory()) {
             sb.append(task.getNumberId()).append(",");
@@ -86,7 +85,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     private void load() throws ManagerSaveException {
         long maxId = 0L;
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
-            bufferedReader.readLine();
             String line = bufferedReader.readLine();
             while (line != null) {
                 line = bufferedReader.readLine();
@@ -113,11 +111,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 if (maxId < numberId) {
                     maxId = numberId;
                 }
-
-                getTaskFromString(line);
             }
+
             line = bufferedReader.readLine();
-            getHistoryFromString(line);
+            for (Integer historyIdTasks : getHistoryFromString(line)) {
+                getTaskByID(historyIdTasks);
+                getEpicByID(historyIdTasks);
+                getSubtaskByID(historyIdTasks);
+            }
+
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка в файле: " + file.getAbsolutePath());
         }
@@ -133,12 +135,33 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         switch (TypesTasks.valueOf(tasksFromString[1])) {
             case TASK:
                 unifiedTask = new Task(tasksFromString[2], tasksFromString[4]);
+                unifiedTask.setStatus(Status.valueOf(tasksFromString[3]));
+                unifiedTask.setNumberId(Long.parseLong(tasksFromString[0]));
+                if (!tasksFromString[5].equals("null")) {
+                    unifiedTask.setStartTime(LocalDateTime.parse(tasksFromString[5]));
+                    unifiedTask.setEndTime(LocalDateTime.parse(tasksFromString[7]));
+                    unifiedTask.setDuration(Duration.between(unifiedTask.getStartTime(), unifiedTask.getEndTime()));
+                }
                 break;
             case EPIC:
-                unifiedTask = new Epic(tasksFromString[2], tasksFromString[4]);
+                unifiedTask = new Epic(tasksFromString[2], tasksFromString[4], this);
+                unifiedTask.setStatus(Status.valueOf(tasksFromString[3]));
+                unifiedTask.setNumberId(Long.parseLong(tasksFromString[0]));
+                if (!tasksFromString[5].equals("null")) {
+                    unifiedTask.setStartTime(LocalDateTime.parse(tasksFromString[5]));
+                    unifiedTask.setEndTime(LocalDateTime.parse(tasksFromString[7]));
+                    unifiedTask.setDuration(Duration.between(unifiedTask.getStartTime(), unifiedTask.getEndTime()));
+                }
                 break;
             case SUBTASK:
-                unifiedTask = new Subtask(tasksFromString[2], tasksFromString[4], parseInt(tasksFromString[5]));
+                unifiedTask = new Subtask(tasksFromString[2], tasksFromString[4], Long.parseLong(tasksFromString[5]));
+                unifiedTask.setStatus(Status.valueOf(tasksFromString[3]));
+                unifiedTask.setNumberId(Long.parseLong(tasksFromString[0]));
+                if (!tasksFromString[6].equals("null")) {
+                    unifiedTask.setStartTime(LocalDateTime.parse(tasksFromString[6]));
+                    unifiedTask.setEndTime(LocalDateTime.parse(tasksFromString[8]));
+                    unifiedTask.setDuration(Duration.between(unifiedTask.getStartTime(), unifiedTask.getEndTime()));
+                }
                 break;
         }
         return unifiedTask;
@@ -187,8 +210,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Обновление задачи.
      */
     @Override
-    public void upgradeTask(Task task) throws ManagerSaveException {
-        super.upgradeTask(task);
+    public void updateTask(Task task, long numberOldTask) throws ManagerSaveException {
+        super.updateTask(task, numberOldTask);
         save();
     }
 
@@ -196,8 +219,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Обновление эпика.
      */
     @Override
-    public void upgradeEpic(Epic epic) throws ManagerSaveException {
-        super.upgradeEpic(epic);
+    public void updateEpic(Epic epic, long numberOldEpic) throws ManagerSaveException {
+        super.updateEpic(epic, numberOldEpic);
         save();
     }
 
@@ -205,8 +228,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Обновление подзадачи.
      */
     @Override
-    public void upgradeSubtask(Subtask subtask) throws ManagerSaveException {
-        super.upgradeSubtask(subtask);
+    public void updateSubtask(Subtask subtask, long numberOldTask) throws ManagerSaveException {
+        super.updateSubtask(subtask, numberOldTask);
         save();
     }
 
@@ -252,8 +275,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void setStatusForEpics(long numberEpicID) throws ManagerSaveException {
-        super.setStatusForEpics(numberEpicID);
+    public void setStatusForEpic(long numberEpicID) throws ManagerSaveException {
+        super.setStatusForEpic(numberEpicID);
         save();
     }
 
@@ -287,29 +310,33 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     public static void main(String[] args) {
 
-        Task t1 = new Task("Task 1", "DescriptionTask 1");
-        Epic e1 = new Epic("Epic 1", "DescriptionEpic 1");
-        Subtask s1 = new Subtask("Subtask 1", "DescriptionSubtask 1", 2);
-        Subtask s2 = new Subtask("Subtask 2", "DescriptionSubtask 2", 2);
-
         File file = new File("file.csv");
         FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
 
+        Task t1 = new Task("Task 1", "DescriptionTask 1",
+                "2022-08-25 | 10:00", 12, 30);
         fileBackedTasksManager.createTask(t1);
+
+
         System.out.println("Tasks:");
+        System.out.println("Time: " + t1.getStartTime() + " - " + t1.getDuration() + " - " + t1.getEndTime());
         System.out.println(fileBackedTasksManager.getListOfTask());
 
+        Epic e1 = new Epic("Epic 1", "DescriptionEpic 1", fileBackedTasksManager);
         fileBackedTasksManager.createTask(e1);
         System.out.println("Epics:");
         System.out.println(fileBackedTasksManager.getListOfEpic());
 
+        Subtask s1 = new Subtask("Subtask 1", "DescriptionSubtask 1",
+                "2022-08-23 | 10:00", 12, 0, e1.getNumberId());
+        Subtask s2 = new Subtask("Subtask 2", "DescriptionSubtask 2",
+                "2022-08-28 | 10:00", 1, 0, e1.getNumberId());
         fileBackedTasksManager.createTask(s1);
         fileBackedTasksManager.createTask(s2);
         System.out.println("Subtasks:");
         System.out.println(fileBackedTasksManager.getListOfSubtask());
 
         System.out.println("Change Status");
-        System.out.println("subtasks - " + fileBackedTasksManager.getListOfSubtask());
         fileBackedTasksManager.setStatusForSubtask(s1, Status.DONE);
         fileBackedTasksManager.setStatusForSubtask(s2, Status.DONE);
         fileBackedTasksManager.setStatusForTask(t1, Status.IN_PROGRESS);
@@ -317,50 +344,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         System.out.println("subtasks - " + fileBackedTasksManager.getListOfSubtask());
         System.out.println("epics - " + fileBackedTasksManager.getListOfEpic());
 
-        System.out.println("Get history");
         fileBackedTasksManager.getTaskByID(t1.getNumberId());
-        fileBackedTasksManager.getEpicByID(12);
-        fileBackedTasksManager.getTaskByID(13);
-        System.out.println(fileBackedTasksManager.getHistoryManager().getHistory());
+        fileBackedTasksManager.getEpicByID(e1.getNumberId());
+        fileBackedTasksManager.getTaskByID(1);
+        System.out.println("History: " + fileBackedTasksManager.getHistoryManager().getHistory());
+
+        System.out.println("Sorted:\n" + fileBackedTasksManager.getPrioritizedTasks());
 
         FileBackedTasksManager.loadFromFile(file);
-
-        //сравниваем списки всех задач, подзадач, эпиков и истории в обоих менеджерах
-        Task t1m = new Task("Task 1", "DescriptionTask 1");
-        Epic e1m = new Epic("Epic 1", "DescriptionEpic 1");
-        Subtask s1m = new Subtask("Subtask 1", "DescriptionSubtask 1", 2);
-        Subtask s2m = new Subtask("Subtask 2", "DescriptionSubtask 2", 2);
-
-        TaskManager manager = Managers.getDefaultTaskManager();
-
-        manager.createTask(t1m);
-        manager.getListOfTask();
-
-        manager.createTask(e1m);
-        manager.getListOfEpic();
-
-        manager.createTask(s1m);
-        manager.createTask(s2m);
-        manager.getListOfSubtask();
-
-        manager.getListOfSubtask();
-        manager.setStatusForSubtask(s1m, Status.DONE);
-        manager.setStatusForSubtask(s2m, Status.DONE);
-        manager.setStatusForTask(t1m, Status.IN_PROGRESS);
-        manager.getListOfTask();
-        manager.getListOfSubtask();
-        manager.getListOfEpic();
-
-
-        manager.getTaskByID(t1m.getNumberId());
-        manager.getEpicByID(12);
-        manager.getTaskByID(13);
-        manager.getHistoryManager().getHistory();
-
-        System.out.println("TESTS:");
-        System.out.println(fileBackedTasksManager.getListOfTask().equals(manager.getListOfTask()));
-        System.out.println(fileBackedTasksManager.getListOfEpic().equals(manager.getListOfEpic()));
-        System.out.println(fileBackedTasksManager.getListOfSubtask().equals(manager.getListOfSubtask()));
-        System.out.println(fileBackedTasksManager.getHistoryManager().getHistory().equals(manager.getHistoryManager().getHistory()));
     }
 }

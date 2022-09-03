@@ -6,10 +6,12 @@ import tasks_types.Status;
 import tasks_types.Subtask;
 import tasks_types.Task;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
 
 public interface TaskManager {
-
     /**
      * Создание задачи. Сам объект должен передаваться в качестве параметра.
      *
@@ -47,6 +49,11 @@ public interface TaskManager {
     ArrayList<Task> getListOfSubtask();
 
     /**
+     * Получение списка задач по приоритетам.
+     */
+    Set<Task> getPrioritizedTasks();
+
+    /**
      * Удаление всех задач.
      */
     void clearListOfTask() throws ManagerSaveException;
@@ -69,11 +76,21 @@ public interface TaskManager {
     Task getTaskByID(long numberID) throws ManagerSaveException;
 
     /**
+     * Получение задачи по идентификатору без истории,для внутреннего пользования.
+     */
+    Task getTaskByIdWithoutStory(long numberId) throws ManagerSaveException;
+
+    /**
      * Получение эпика по идентификатору.
      *
      * @return
      */
     Epic getEpicByID(long numberID);
+
+    /**
+     * Получение эпика по идентификатору, без истории для внутреннего пользования.
+     */
+    Epic getEpicByIdWithoutStory(long numberId);
 
     /**
      * Получение подзадачи по идентификатору.
@@ -83,19 +100,24 @@ public interface TaskManager {
     Subtask getSubtaskByID(long numberID);
 
     /**
+     * Получение подзадачи по идентификатору, без истории для внутреннего пользования.
+     */
+    Subtask getSubtaskByIdWithoutStory(long numberId);
+
+    /**
      * Обновление задачи.
      */
-    void upgradeTask(Task task) throws ManagerSaveException;
+    void updateTask(Task task, long numberOldTask) throws ManagerSaveException;
 
     /**
      * Обновление эпика.
      */
-    void upgradeEpic(Epic epic) throws ManagerSaveException;
+    void updateEpic(Epic epic, long numberOldEpic) throws ManagerSaveException;
 
     /**
      * Обновление подзадачи.
      */
-    void upgradeSubtask(Subtask subtask) throws ManagerSaveException;
+    void updateSubtask(Subtask subtask, long numberOldSubtask) throws ManagerSaveException;
 
     /**
      * Удаление задачи по идентификатору.
@@ -125,10 +147,20 @@ public interface TaskManager {
     /**
      * Расчет статуса для эпиков
      */
-    void setStatusForEpics(long numberEpicID) throws ManagerSaveException;
+    void setStatusForEpic(long numberEpicID) throws ManagerSaveException;
 
     /**
      * Получаем объект для получения и добавления истории
      */
     HistoryManager getHistoryManager();
+
+//    /**
+//     * Устанавливаем время выполнения задачи
+//     */
+//    void setTaskTime(Task task, String startDateTime, int hours, int minutes);
+
+//    /**
+//     * Устанавливаем продолжительность выполнения задачи
+//     */
+//    void setDurationOfTask(Task task, int hours, int minutes);
 }
