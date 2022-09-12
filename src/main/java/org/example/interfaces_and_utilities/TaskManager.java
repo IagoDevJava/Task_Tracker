@@ -103,17 +103,17 @@ public interface TaskManager {
     /**
      * Обновление задачи.
      */
-    void updateTask(Task task, long numberOldTask);
+    void updateTask(Task task);
 
     /**
      * Обновление эпика.
      */
-    void updateEpic(Epic epic, long numberOldEpic);
+    void updateEpic(Epic epic);
 
     /**
      * Обновление подзадачи.
      */
-    void updateSubtask(Subtask subtask, long numberOldSubtask);
+    void updateSubtask(Subtask subtask);
 
     /**
      * Удаление задачи по идентификатору.

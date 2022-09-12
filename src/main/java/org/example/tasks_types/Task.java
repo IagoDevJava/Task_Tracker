@@ -14,7 +14,7 @@ public class Task {
     private LocalDateTime startTime;
     private Duration duration;
 
-    private final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd | HH:mm");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd | HH:mm");
 
     public Task(String nameTask, String description, String startDateTime, int hoursDuration, int minutesDuration) {
         this.nameTask = nameTask;

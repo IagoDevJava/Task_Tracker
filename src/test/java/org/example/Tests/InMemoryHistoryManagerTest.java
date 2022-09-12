@@ -114,12 +114,6 @@ class InMemoryHistoryManagerTest {
         assertEquals(expectedSizeInt, historyManager.getHistory().size(), "Задача не удалена из истории просмотров");
     }
 
-    /**
-     * Так же хорошо было бы сравнить значение поля, которое хранит идентификатор последней добавленной задачи
-     * в InMemoryTaskManager)
-     * Для того, чтобы нам произвести сравнение, необходимо будет переопределить методы equals и hashCode
-     * в классах Task, Epic, Subtask
-     * */
     @Test
     void shouldGetIdLastTask() {
         taskManager.createTask(task);

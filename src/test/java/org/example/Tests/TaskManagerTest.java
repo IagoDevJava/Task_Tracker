@@ -32,7 +32,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         expectedTask = "1,TASK,Task 1.1,NEW,DescriptionTask 1,2022-08-25T10:00,PT1H20M,2022-08-25T11:20";
         expectedEpic = "1,EPIC,Epic 1.1,IN_PROGRESS,DescriptionEpic 1," +
                 "2022-08-25T10:00,PT-17531639991214H-39M-59.999999999S,2022-08-25T11:20";
-        expectedSubtask = "2,SUBTASK,Subtask 1.1,NEW,DescriptionSubtask 1,1,2022-08-25T10:00,PT1H20M,2022-08-25T11:20";
+        expectedSubtask = "2,SUBTASK,Subtask 1.1,NEW,DescriptionSubtask 1.1,1,2022-08-25T10:00,PT1H20M,2022-08-25T11:20";
     }
 
     @Test
@@ -329,8 +329,10 @@ abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     void shouldUpdateTask() {
         taskManager.createTask(task);
-        taskManager.updateTask(new Task("Task 1.1", "DescriptionTask 1",
-                "2022-08-25 | 10:00", 1, 20), task.getNumberId());
+        Task newTask = new Task("Task 1.1", "DescriptionTask 1",
+                "2022-08-25 | 10:00", 1, 20);
+        newTask.setNumberId(task.getNumberId());
+        taskManager.updateTask(newTask);
 
         assertEquals(expectedTask, task.toString(), "Задача не обновлена");
     }
@@ -339,9 +341,10 @@ abstract class TaskManagerTest<T extends TaskManager> {
     void shouldNotUpdateTask() {
         taskManager.createTask(task);
         Task newTask = new Task("Task 1.1", "DescriptionTask 1",
-                "2022-08-25 | 10:00", 1, 10);
+                "2022-08-25 | 10:00", 1, 20);
+        newTask.setNumberId(task.getNumberId());
+        taskManager.updateTask(newTask);
 
-        taskManager.updateTask(newTask, task.getNumberId());
         boolean isUpdateTask = newTask.equals(task);
 
         assertFalse(isUpdateTask, "Задачи обновились");
@@ -351,9 +354,12 @@ abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     void shouldUpdateEpic() {
         taskManager.createTask(epic);
-        taskManager.updateEpic(new Epic("Epic 1.1", "DescriptionEpic 1", taskManager), epic.getNumberId());
+        Epic newEpic = new Epic("Epic 1.1", "DescriptionEpic 1", taskManager);
         taskManager.createTask(new Subtask("Subtask 1.1", "DescriptionSubtask 1",
                 "2022-08-25 | 10:00", 1, 20, 1));
+        newEpic.setNumberId(epic.getNumberId());
+
+        taskManager.updateEpic(newEpic);
 
         assertEquals(expectedEpic, epic.toString());
     }
@@ -362,8 +368,11 @@ abstract class TaskManagerTest<T extends TaskManager> {
     void shouldNotUpdateEpic() {
         taskManager.createTask(epic);
         Epic newEpic = new Epic("Epic 1.1", "DescriptionEpic 1", taskManager);
+        taskManager.createTask(new Subtask("Subtask 1.1", "DescriptionSubtask 1",
+                "2022-08-25 | 10:00", 1, 20, 1));
+        newEpic.setNumberId(epic.getNumberId());
 
-        taskManager.updateEpic(newEpic, epic.getNumberId());
+        taskManager.updateEpic(newEpic);
         boolean isUpdateEpic = newEpic.equals(epic);
 
         assertFalse(isUpdateEpic, "Задачи обновились");
@@ -375,10 +384,11 @@ abstract class TaskManagerTest<T extends TaskManager> {
         subtask = new Subtask("Subtask 1", "DescriptionSubtask 1",
                 "2022-08-25 | 10:00", 1, 10, epic.getNumberId());
         taskManager.createTask(subtask);
-        taskManager.updateSubtask(
-                new Subtask("Subtask 1.1", "DescriptionSubtask 1",
-                        "2022-08-25 | 10:00", 1, 20, epic.getNumberId()),
-                subtask.getNumberId());
+        Subtask newSubtask = new Subtask("Subtask 1.1", "DescriptionSubtask 1.1",
+                "2022-08-25 | 10:00", 1, 20, epic.getNumberId());
+        newSubtask.setNumberId(subtask.getNumberId());
+
+        taskManager.updateSubtask(newSubtask);
 
         assertEquals(expectedSubtask, subtask.toString());
     }
@@ -391,8 +401,9 @@ abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createTask(subtask);
         Subtask newSubtask = new Subtask("Subtask 1.1", "DescriptionSubtask 1",
                 "2022-08-25 | 10:00", 1, 20, epic.getNumberId());
+        newSubtask.setNumberId(subtask.getNumberId());
 
-        taskManager.updateSubtask(newSubtask, subtask.getNumberId());
+        taskManager.updateSubtask(newSubtask);
         boolean isUpdateSubtask = newSubtask.equals(subtask);
 
         assertFalse(isUpdateSubtask, "Задачи обновились");

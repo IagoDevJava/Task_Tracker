@@ -12,22 +12,24 @@ public class Main {
 
         TaskManager manager = Managers.getDefaultTaskManager();
         Task t1 = new Task("Task 1", "DescriptionTask 1",
-                "2022-08-25 | 10:00", 12, 30);
+                "2022-08-25 | 10:00", 1, 30);
         manager.createTask(t1);
 
         Task t2 = new Task("Task 2", "DescriptionTask 2",
-                "2022-08-23 | 12:00", 12, 30);
+                "2022-08-25 | 12:00", 1, 30);
         manager.createTask(t2);
+//        t2.setNumberId(t1.getNumberId());
+//        manager.updateTask(t2);
 
         Epic e1 = new Epic("Epic 1", "DescriptionEpic 1",
                 manager);
         manager.createTask(e1);
 
         Subtask s1 = new Subtask("Subtask 1", "DescriptionSubtask 1",
-                "2022-08-27 | 10:00", 72, 0, e1.getNumberId());
+                "2022-08-27 | 10:00", 1, 0, e1.getNumberId());
         manager.createTask(s1);
         Subtask s2 = new Subtask("Subtask 2", "DescriptionSubtask 2",
-                "2022-08-28 | 10:00", 1, 0, e1.getNumberId());
+                "2022-08-26 | 10:00", 1, 0, e1.getNumberId());
         manager.createTask(s2);
 
 //        System.out.println("Tasks:");
@@ -59,6 +61,7 @@ public class Main {
 //        System.out.println(manager.getHistoryManager().getHistory());
 
 //        System.out.println("Sorted:\n" + manager.getPrioritizedListOfTasks());
+//        manager.clearListOfTask();
         System.out.println("Sorted:\n"
                 + manager.getPrioritizedTasks());
     }

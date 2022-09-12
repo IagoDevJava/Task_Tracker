@@ -26,7 +26,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     /**
      * Сохранение задач по строкам в файл
      */
-    private void save() throws ManagerSaveException {
+    private void save() {
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(FILE))) {
             bufferedWriter.append(HEADER_OF_FILE);
 
@@ -74,7 +74,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     /**
      * Загрузка задач в файл
      */
-    public static FileBackedTasksManager loadFromFile(File file) throws ManagerSaveException {
+    public static FileBackedTasksManager loadFromFile(File file) {
         final FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
         fileBackedTasksManager.load();
         return fileBackedTasksManager;
@@ -83,7 +83,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     /**
      * Загрузка задач построчно
      */
-    private void load() throws ManagerSaveException {
+    private void load() {
         long maxId = 0L;
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(FILE, StandardCharsets.UTF_8))) {
             String line = bufferedReader.readLine();
@@ -133,7 +133,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     /**
      * Получение задачи из строки
      */
-    private Task getTaskFromString(String value) throws ManagerSaveException {
+    private Task getTaskFromString(String value) {
         final String[] tasksFromString = value.split(",");
         Task unifiedTask = null;
         switch (TypesTasks.valueOf(tasksFromString[1])) {
@@ -214,8 +214,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Обновление задачи.
      */
     @Override
-    public void updateTask(Task task, long numberOldTask) {
-        super.updateTask(task, numberOldTask);
+    public void updateTask(Task task) {
+        super.updateTask(task);
         save();
     }
 
@@ -223,8 +223,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Обновление эпика.
      */
     @Override
-    public void updateEpic(Epic epic, long numberOldEpic) {
-        super.updateEpic(epic, numberOldEpic);
+    public void updateEpic(Epic epic) {
+        super.updateEpic(epic);
         save();
     }
 
@@ -232,8 +232,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Обновление подзадачи.
      */
     @Override
-    public void updateSubtask(Subtask subtask, long numberOldTask) {
-        super.updateSubtask(subtask, numberOldTask);
+    public void updateSubtask(Subtask subtask) {
+        super.updateSubtask(subtask);
         save();
     }
 
