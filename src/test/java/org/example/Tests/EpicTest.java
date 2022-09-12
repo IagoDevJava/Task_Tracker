@@ -1,12 +1,12 @@
-package Tests;
+package org.example.Tests;
 
-import interfaces_and_utilities.Managers;
-import interfaces_and_utilities.TaskManager;
+import org.example.interfaces_and_utilities.Managers;
+import org.example.interfaces_and_utilities.TaskManager;
+import org.example.tasks_types.Epic;
+import org.example.tasks_types.Status;
+import org.example.tasks_types.Subtask;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import tasks_types.Epic;
-import tasks_types.Status;
-import tasks_types.Subtask;
 
 class EpicTest {
 

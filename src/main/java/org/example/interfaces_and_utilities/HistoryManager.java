@@ -1,6 +1,6 @@
-package interfaces_and_utilities;
+package org.example.interfaces_and_utilities;
 
-import tasks_types.Task;
+import org.example.tasks_types.Task;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package tasks_types;
+package org.example.tasks_types;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -63,14 +63,6 @@ public class Subtask extends Task {
     @Override
     public void setStartTime(LocalDateTime startTime) {
         super.setStartTime(startTime);
-    }
-
-    /**
-     * установить продолжительность сабтаски
-     */
-    @Override
-    public LocalDateTime getEndTime() {
-        return super.getEndTime();
     }
 
     @Override

@@ -1,8 +1,8 @@
-package managers_types;
+package org.example.managers_types;
 
-import exceptions.ManagerSaveException;
-import interfaces_and_utilities.HistoryManager;
-import tasks_types.*;
+import org.example.exceptions.ManagerSaveException;
+import org.example.interfaces_and_utilities.HistoryManager;
+import org.example.tasks_types.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -16,18 +16,19 @@ import static java.lang.Integer.valueOf;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
-    private File file;
+    private final File FILE;
+    private static final String HEADER_OF_FILE = "id,type,name,status,description,epic, startTime, duration, endTime\n";
 
     public FileBackedTasksManager(File file) {
-        this.file = file;
+        this.FILE = file;
     }
 
     /**
      * Сохранение задач по строкам в файл
      */
     private void save() throws ManagerSaveException {
-        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file))) {
-            bufferedWriter.append("id,type,name,status,description,epic, startTime, duration, endTime\n");
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(FILE))) {
+            bufferedWriter.append(HEADER_OF_FILE);
 
             for (Map.Entry<Long, Task> idTaskEntry : allTasks.entrySet()) {
                 bufferedWriter.append(toString(idTaskEntry.getValue()));
@@ -48,7 +49,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             bufferedWriter.append(historyToString(historyManager));
 
         } catch (IOException e) {
-            throw new ManagerSaveException("Ошибка в файле: " + file.getAbsolutePath());
+            throw new ManagerSaveException("Ошибка в файле: " + FILE.getAbsolutePath());
         }
     }
 
@@ -63,7 +64,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Получение строки с историей
      */
     private static String historyToString(HistoryManager historyManager) {
-        StringBuilder sb = new StringBuilder("");
+        StringBuilder sb = new StringBuilder();
         for (Task task : historyManager.getHistory()) {
             sb.append(task.getNumberId()).append(",");
         }
@@ -84,7 +85,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      */
     private void load() throws ManagerSaveException {
         long maxId = 0L;
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(FILE, StandardCharsets.UTF_8))) {
             String line = bufferedReader.readLine();
             while (line != null) {
                 line = bufferedReader.readLine();
@@ -96,12 +97,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 switch (getTaskFromString(line).getType()) {
                     case TASK:
                         allTasks.put(numberId, getTaskFromString(line));
+                        prioritizedMapOfTasks.put(getTaskFromString(line).getStartTime(), getTaskFromString(line));
                         break;
                     case EPIC:
                         allEpicTasks.put(numberId, (Epic) getTaskFromString(line));
                         break;
                     case SUBTASK:
                         allSubtasks.put(numberId, (Subtask) getTaskFromString(line));
+                        prioritizedMapOfTasks.put(getTaskFromString(line).getStartTime(),
+                                getTaskFromString(line));
                         if (allEpicTasks.containsKey(((Subtask) getTaskFromString(line)).getMyEpicID())) {
                             Epic epic = allEpicTasks.get(((Subtask) getTaskFromString(line)).getMyEpicID());
                             epic.getIdsOfSubtasksEpic().add(numberId);
@@ -121,7 +125,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
 
         } catch (IOException e) {
-            throw new ManagerSaveException("Ошибка в файле: " + file.getAbsolutePath());
+            throw new ManagerSaveException("Ошибка в файле: " + FILE.getAbsolutePath());
         }
         createdID = maxId;
     }
@@ -139,8 +143,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 unifiedTask.setNumberId(Long.parseLong(tasksFromString[0]));
                 if (!tasksFromString[5].equals("null")) {
                     unifiedTask.setStartTime(LocalDateTime.parse(tasksFromString[5]));
-                    unifiedTask.setEndTime(LocalDateTime.parse(tasksFromString[7]));
-                    unifiedTask.setDuration(Duration.between(unifiedTask.getStartTime(), unifiedTask.getEndTime()));
+                    unifiedTask.setDuration(Duration.parse(tasksFromString[6]));
+                    unifiedTask.getEndTime();
                 }
                 break;
             case EPIC:
@@ -149,8 +153,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 unifiedTask.setNumberId(Long.parseLong(tasksFromString[0]));
                 if (!tasksFromString[5].equals("null")) {
                     unifiedTask.setStartTime(LocalDateTime.parse(tasksFromString[5]));
-                    unifiedTask.setEndTime(LocalDateTime.parse(tasksFromString[7]));
-                    unifiedTask.setDuration(Duration.between(unifiedTask.getStartTime(), unifiedTask.getEndTime()));
+                    unifiedTask.setDuration(Duration.parse(tasksFromString[6]));
+                    this.setEndTimeEpic((Epic) unifiedTask);
                 }
                 break;
             case SUBTASK:
@@ -159,8 +163,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 unifiedTask.setNumberId(Long.parseLong(tasksFromString[0]));
                 if (!tasksFromString[6].equals("null")) {
                     unifiedTask.setStartTime(LocalDateTime.parse(tasksFromString[6]));
-                    unifiedTask.setEndTime(LocalDateTime.parse(tasksFromString[8]));
-                    unifiedTask.setDuration(Duration.between(unifiedTask.getStartTime(), unifiedTask.getEndTime()));
+                    unifiedTask.setDuration(Duration.parse(tasksFromString[7]));
+                    unifiedTask.getEndTime();
                 }
                 break;
         }
@@ -183,7 +187,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Удаление всех задач.
      */
     @Override
-    public void clearListOfTask() throws ManagerSaveException {
+    public void clearListOfTask() {
         super.clearListOfTask();
         save();
     }
@@ -192,7 +196,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Удаление всех эпиков.
      */
     @Override
-    public void clearListOfEpic() throws ManagerSaveException {
+    public void clearListOfEpic() {
         super.clearListOfEpic();
         save();
     }
@@ -201,7 +205,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Удаление всех подзадач.
      */
     @Override
-    public void clearListOfSubtask() throws ManagerSaveException {
+    public void clearListOfSubtask() {
         super.clearListOfSubtask();
         save();
     }
@@ -210,7 +214,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Обновление задачи.
      */
     @Override
-    public void updateTask(Task task, long numberOldTask) throws ManagerSaveException {
+    public void updateTask(Task task, long numberOldTask) {
         super.updateTask(task, numberOldTask);
         save();
     }
@@ -219,7 +223,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Обновление эпика.
      */
     @Override
-    public void updateEpic(Epic epic, long numberOldEpic) throws ManagerSaveException {
+    public void updateEpic(Epic epic, long numberOldEpic) {
         super.updateEpic(epic, numberOldEpic);
         save();
     }
@@ -228,7 +232,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Обновление подзадачи.
      */
     @Override
-    public void updateSubtask(Subtask subtask, long numberOldTask) throws ManagerSaveException {
+    public void updateSubtask(Subtask subtask, long numberOldTask) {
         super.updateSubtask(subtask, numberOldTask);
         save();
     }
@@ -237,7 +241,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Удаление задачи по идентификатору.
      */
     @Override
-    public void deleteTaskForID(long numberId) throws ManagerSaveException {
+    public void deleteTaskForID(long numberId) {
         super.deleteTaskForID(numberId);
         save();
     }
@@ -246,7 +250,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Удаление эпика по идентификатору.
      */
     @Override
-    public void deleteEpicForID(long numberId) throws ManagerSaveException {
+    public void deleteEpicForID(long numberId) {
         super.deleteEpicForID(numberId);
         save();
     }
@@ -255,57 +259,126 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
      * Удаление подзадачи по идентификатору.
      */
     @Override
-    public void deleteSubtaskForID(long numberId) throws ManagerSaveException {
+    public void deleteSubtaskForID(long numberId) {
         super.deleteSubtaskForID(numberId);
         save();
     }
 
+    /**
+     * Установка статуса для задачи
+     */
     @Override
-    public Task setStatusForTask(Task task, Status status) throws ManagerSaveException {
+    public Task setStatusForTask(Task task, Status status) {
         Task childTask = super.setStatusForTask(task, status);
         save();
         return childTask;
     }
 
+    /**
+     * Установка статуса для подзадачи
+     */
     @Override
-    public Subtask setStatusForSubtask(Subtask subtask, Status status) throws ManagerSaveException {
+    public Subtask setStatusForSubtask(Subtask subtask, Status status) {
         Subtask childSubtask = super.setStatusForSubtask(subtask, status);
         save();
         return childSubtask;
     }
 
+    /**
+     * Установка статуса для эпиков
+     */
     @Override
-    public void setStatusForEpic(long numberEpicID) throws ManagerSaveException {
+    public void setStatusForEpic(long numberEpicID) {
         super.setStatusForEpic(numberEpicID);
         save();
     }
 
+    /**
+     * Создание задачи. Сам объект должен передаваться в качестве параметра.
+     */
     @Override
-    public long createTask(Task task) throws ManagerSaveException {
+    public long createTask(Task task) {
         long childTask = super.createTask(task);
         save();
         return childTask;
     }
 
+    /**
+     * Создание эпика. Сам объект должен передаваться в качестве параметра.
+     */
     @Override
-    public long createTask(Epic epic) throws ManagerSaveException {
+    public long createTask(Epic epic) {
         long childEpic = super.createTask(epic);
         save();
         return childEpic;
     }
 
+    /**
+     * Создание подзадачи. Сам объект должен передаваться в качестве параметра.
+     */
     @Override
-    public long createTask(Subtask subtask) throws ManagerSaveException {
+    public long createTask(Subtask subtask) {
         long childSubtask = super.createTask(subtask);
         save();
         return childSubtask;
     }
 
+    /**
+     * Получение задачи по идентификатору.
+     */
     @Override
-    public Task getTaskByID(long numberId) throws ManagerSaveException {
-        Task t = super.getTaskByID(numberId);
+    public Task getTaskByID(long numberId) {
+        Task task = super.getTaskByID(numberId);
         save();
-        return t;
+        return task;
+    }
+
+    /**
+     * Получение эпика по идентификатору.
+     */
+    @Override
+    public Epic getEpicByID(long numberId) {
+        Epic epic = super.getEpicByID(numberId);
+        save();
+        return epic;
+    }
+
+    /**
+     * Получение задачи по идентификатору.
+     */
+    @Override
+    public Subtask getSubtaskByID(long numberId) {
+        Subtask subtask = super.getSubtaskByID(numberId);
+        save();
+        return subtask;
+    }
+
+    @Override
+    public LocalDateTime setStartTimeEpic(Epic epic) {
+        LocalDateTime localDateTime = super.setStartTimeEpic(epic);
+        save();
+        return localDateTime;
+    }
+
+    @Override
+    public LocalDateTime setEndTimeEpic(Epic epic) {
+        LocalDateTime localDateTime = super.setEndTimeEpic(epic);
+        save();
+        return localDateTime;
+    }
+
+    @Override
+    public Duration setDurationEpic(Epic epic) {
+        Duration duration = super.setDurationEpic(epic);
+        save();
+        return duration;
+    }
+
+    @Override
+    public Duration updateTimeEpic(Epic epic) {
+        Duration duration = super.updateTimeEpic(epic);
+        save();
+        return duration;
     }
 
     public static void main(String[] args) {

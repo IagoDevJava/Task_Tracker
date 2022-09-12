@@ -1,7 +1,7 @@
-package managers_types;
+package org.example.managers_types;
 
-import interfaces_and_utilities.HistoryManager;
-import tasks_types.Task;
+import org.example.interfaces_and_utilities.HistoryManager;
+import org.example.tasks_types.Task;
 
 import java.util.*;
 

@@ -1,7 +1,4 @@
 id,type,name,status,description,epic, startTime, duration, endTime
-1,TASK,Task 1,IN_PROGRESS,DescriptionTask 1,2022-08-25T10:00,PT12H30M,2022-08-25T22:30
-2,EPIC,Epic 1,DONE,DescriptionEpic 1,-999999999-01-01T00:00,null,+999999999-12-31T23:59:59.999999999
-3,SUBTASK,Subtask 1,DONE,DescriptionSubtask 1,2,2022-08-23T10:00,PT12H,2022-08-23T22:00
-4,SUBTASK,Subtask 2,DONE,DescriptionSubtask 2,2,2022-08-28T10:00,PT1H,2022-08-28T11:00
+1,TASK,Task 1,NEW,DescriptionTask 1,2022-08-25T10:00,PT1H30M,2022-08-25T11:30
 
-2,1,
+1,

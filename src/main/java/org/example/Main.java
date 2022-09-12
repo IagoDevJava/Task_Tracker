@@ -1,9 +1,11 @@
-import exceptions.ManagerSaveException;
-import interfaces_and_utilities.Managers;
-import interfaces_and_utilities.TaskManager;
-import tasks_types.Epic;
-import tasks_types.Subtask;
-import tasks_types.Task;
+package org.example;
+
+import org.example.exceptions.ManagerSaveException;
+import org.example.interfaces_and_utilities.Managers;
+import org.example.interfaces_and_utilities.TaskManager;
+import org.example.tasks_types.Epic;
+import org.example.tasks_types.Subtask;
+import org.example.tasks_types.Task;
 
 public class Main {
     public static void main(String[] args) throws ManagerSaveException {
@@ -14,7 +16,7 @@ public class Main {
         manager.createTask(t1);
 
         Task t2 = new Task("Task 2", "DescriptionTask 2",
-                "2022-08-26 | 12:00", 12, 30);
+                "2022-08-23 | 12:00", 12, 30);
         manager.createTask(t2);
 
         Epic e1 = new Epic("Epic 1", "DescriptionEpic 1",

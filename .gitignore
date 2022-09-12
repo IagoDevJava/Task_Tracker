@@ -3,6 +3,10 @@
 
 # Log file
 *.log
+.idea/
+target/
+pom.xml
+.gitignore
 
 # BlueJ files
 *.ctxt

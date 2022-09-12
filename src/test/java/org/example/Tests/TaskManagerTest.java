@@ -1,36 +1,37 @@
-package Tests;
+package org.example.Tests;
 
-import interfaces_and_utilities.TaskManager;
+import org.example.interfaces_and_utilities.TaskManager;
+import org.example.tasks_types.Epic;
+import org.example.tasks_types.Status;
+import org.example.tasks_types.Subtask;
+import org.example.tasks_types.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import tasks_types.Epic;
-import tasks_types.Status;
-import tasks_types.Subtask;
-import tasks_types.Task;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 abstract class TaskManagerTest<T extends TaskManager> {
+    String expectedTask;
+    String expectedEpic;
+    String expectedSubtask;
     private T taskManager;
     private Task task;
     private Epic epic;
     private Subtask subtask;
-    String expectedTask;
-    String expectedEpic;
-    String expectedSubtask;
 
     abstract T createTaskManager();
 
     @BeforeEach
-    private void updateTaskManager() {
+    public void updateTaskManager() {
         taskManager = createTaskManager();
         task = new Task("Task 1", "DescriptionTask 1",
                 "2022-08-25 | 10:00", 1, 10);
         epic = new Epic("Epic 1", "DescriptionEpic 1", taskManager);
         expectedTask = "1,TASK,Task 1.1,NEW,DescriptionTask 1,2022-08-25T10:00,PT1H20M,2022-08-25T11:20";
-        expectedEpic = "1,EPIC,Epic 1.1,IN_PROGRESS,DescriptionEpic 1,2022-08-25T10:00,PT1H20M,2022-08-25T11:20";
+        expectedEpic = "1,EPIC,Epic 1.1,IN_PROGRESS,DescriptionEpic 1," +
+                "2022-08-25T10:00,PT-17531639991214H-39M-59.999999999S,2022-08-25T11:20";
         expectedSubtask = "2,SUBTASK,Subtask 1.1,NEW,DescriptionSubtask 1,1,2022-08-25T10:00,PT1H20M,2022-08-25T11:20";
     }
 
@@ -337,7 +338,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     void shouldNotUpdateTask() {
         taskManager.createTask(task);
-        Task newTask = new Task("Task 1.1", "DescriptionTask 1");
+        Task newTask = new Task("Task 1.1", "DescriptionTask 1",
+                "2022-08-25 | 10:00", 1, 10);
 
         taskManager.updateTask(newTask, task.getNumberId());
         boolean isUpdateTask = newTask.equals(task);

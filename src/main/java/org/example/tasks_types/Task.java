@@ -1,4 +1,4 @@
-package tasks_types;
+package org.example.tasks_types;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -12,15 +12,16 @@ public class Task {
     private String description;
     private long numberId;
     private LocalDateTime startTime;
-    private LocalDateTime endTime;
     private Duration duration;
+
+    private final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd | HH:mm");
 
     public Task(String nameTask, String description, String startDateTime, int hoursDuration, int minutesDuration) {
         this.nameTask = nameTask;
         this.description = description;
         startTime = getStartTimeFromString(startDateTime);
         duration = getDurationFromString(hoursDuration, minutesDuration);
-        endTime = getEndTimeFromDuration();
+        getEndTime();
     }
 
     public Task(String nameTask, String description) {
@@ -32,8 +33,7 @@ public class Task {
      * Получаем начало выполнения задачи из строки
      */
     public LocalDateTime getStartTimeFromString(String startDateTime) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd | HH:mm");
-        return LocalDateTime.parse(startDateTime, formatter);
+        return LocalDateTime.parse(startDateTime, FORMATTER);
     }
 
     /**
@@ -56,7 +56,7 @@ public class Task {
     /**
      * Получаем конец выполнения задачи по продолжительности
      */
-    public LocalDateTime getEndTimeFromDuration() {
+    public LocalDateTime getEndTime() {
         return startTime.plus(duration);
     }
 
@@ -112,13 +112,6 @@ public class Task {
         this.startTime = startTime;
     }
 
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -131,12 +124,12 @@ public class Task {
                 && Objects.equals(description, task.description)
                 && Objects.equals(startTime, task.startTime)
                 && Objects.equals(duration, task.duration)
-                && Objects.equals(endTime, task.endTime);
+                && Objects.equals(FORMATTER, task.FORMATTER);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(nameTask, status, description, numberId, startTime, duration, endTime);
+        return Objects.hash(nameTask, status, description, numberId, startTime, duration, FORMATTER);
     }
 
     @Override
@@ -148,6 +141,6 @@ public class Task {
                 description + "," +
                 startTime + "," +
                 duration + "," +
-                endTime;
+                getEndTime();
     }
 }

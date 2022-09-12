@@ -1,4 +1,4 @@
-package tasks_types;
+package org.example.tasks_types;
 
 public enum Status {
     NEW,

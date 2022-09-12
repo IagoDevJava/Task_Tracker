@@ -1,33 +1,31 @@
-package Tests;
+package org.example.Tests;
 
-import managers_types.InMemoryHistoryManager;
-import managers_types.InMemoryTaskManager;
+import org.example.managers_types.InMemoryHistoryManager;
+import org.example.managers_types.InMemoryTaskManager;
+import org.example.tasks_types.Epic;
+import org.example.tasks_types.Subtask;
+import org.example.tasks_types.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import tasks_types.Epic;
-import tasks_types.Subtask;
-import tasks_types.Task;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 class InMemoryHistoryManagerTest {
 
 
+    String expectedTask;
+    String expectedEpic;
+    String expectedSubtask;
     private InMemoryHistoryManager historyManager;
     private InMemoryTaskManager taskManager;
     private Task task;
     private Epic epic;
     private Subtask subtask;
-    String expectedTask;
-    String expectedEpic;
-    String expectedSubtask;
-
 
     @BeforeEach
-    private void updateTaskManager() {
+    void updateTaskManager() {
         historyManager = new InMemoryHistoryManager();
         taskManager = new InMemoryTaskManager();
 
@@ -40,11 +38,6 @@ class InMemoryHistoryManagerTest {
         expectedEpic = "1,EPIC,Epic 1,IN_PROGRESS,DescriptionEpic 1,2022-08-25T10:00,PT1H10M,2022-08-25T11:10";
         expectedSubtask = "2,SUBTASK,Subtask 1.1,NEW,DescriptionSubtask 1,1,2022-08-25T10:00,PT1H20M,2022-08-25T11:20";
     }
-
-    /**
-     * a. Пустая история задач.
-     * b. Дублирование.
-     * с. Удаление из истории: начало, середина, конец.*/
 
     @Test
     void shouldAddOneTask() {
@@ -62,7 +55,7 @@ class InMemoryHistoryManagerTest {
 
         List<Task> expectedEmptyList = List.of();
 
-        assertEquals(expectedEmptyList, historyManager.getHistory(),"Список не пуст.");
+        assertEquals(expectedEmptyList, historyManager.getHistory(), "Список не пуст.");
     }
 
     @Test
@@ -77,7 +70,7 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    void shouldDeleteTask1() {
+    void shouldDeleteTask() {
         taskManager.createTask(task);
         taskManager.createTask(epic);
         taskManager.createTask(subtask);
@@ -92,7 +85,7 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    void shouldDeleteTask2() {
+    void shouldDeleteEpic() {
         taskManager.createTask(task);
         taskManager.createTask(epic);
         taskManager.createTask(subtask);
@@ -107,7 +100,7 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
-    void shouldDeleteTask3() {
+    void shouldDeleteSubtask() {
         taskManager.createTask(task);
         taskManager.createTask(epic);
         taskManager.createTask(subtask);
@@ -119,5 +112,22 @@ class InMemoryHistoryManagerTest {
         int expectedSizeInt = 2;
 
         assertEquals(expectedSizeInt, historyManager.getHistory().size(), "Задача не удалена из истории просмотров");
+    }
+
+    /**
+     * Так же хорошо было бы сравнить значение поля, которое хранит идентификатор последней добавленной задачи
+     * в InMemoryTaskManager)
+     * Для того, чтобы нам произвести сравнение, необходимо будет переопределить методы equals и hashCode
+     * в классах Task, Epic, Subtask
+     * */
+    @Test
+    void shouldGetIdLastTask() {
+        taskManager.createTask(task);
+        taskManager.createTask(epic);
+        taskManager.createTask(subtask);
+
+        long expectedID = taskManager.getCreatedID();
+
+        assertEquals(expectedID, subtask.getNumberId(), "Id сгенерирован неверно");
     }
 }
