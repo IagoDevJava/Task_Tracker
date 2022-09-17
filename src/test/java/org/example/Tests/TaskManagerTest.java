@@ -1,10 +1,10 @@
 package org.example.Tests;
 
-import org.example.interfaces_and_utilities.TaskManager;
-import org.example.tasks_types.Epic;
-import org.example.tasks_types.Status;
-import org.example.tasks_types.Subtask;
-import org.example.tasks_types.Task;
+import org.example.manager.interfaces_and_utilities.TaskManager;
+import org.example.tasks.Epic;
+import org.example.tasks.Status;
+import org.example.tasks.Subtask;
+import org.example.tasks.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -87,7 +87,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     public void shouldCreateSubtask() {
         taskManager.createTask(epic);
         subtask = new Subtask("Subtask 1", "DescriptionSubtask 1",
-                "2022-08-23 | 20:30", 11, 38, epic.getNumberId());
+                "2022-08-23 | 20:30", 11, 38, epic.getId());
         final long subtaskId = taskManager.createTask(subtask);
 
         final Subtask savedSubtask = taskManager.getSubtaskByID(subtaskId);
@@ -99,7 +99,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     public void shouldCreateSubtaskNotNull() {
         taskManager.createTask(epic);
         subtask = new Subtask("Subtask 1", "DescriptionSubtask 1",
-                "2022-08-23 | 20:30", 11, 38, epic.getNumberId());
+                "2022-08-23 | 20:30", 11, 38, epic.getId());
         final long subtaskId = taskManager.createTask(subtask);
         final Subtask savedSubtask = taskManager.getSubtaskByID(subtaskId);
 
@@ -171,7 +171,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     public void shouldGetListOfSubtask() {
         taskManager.createTask(epic);
         subtask = new Subtask("Subtask 1", "DescriptionSubtask 1",
-                "2022-08-23 | 20:30", 11, 38, epic.getNumberId());
+                "2022-08-23 | 20:30", 11, 38, epic.getId());
         taskManager.createTask(subtask);
 
         final List<Task> subtask = taskManager.getListOfSubtask();
@@ -183,7 +183,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     public void shouldGetSubtask() {
         taskManager.createTask(epic);
         subtask = new Subtask("Subtask 1", "DescriptionSubtask 1",
-                "2022-08-23 | 20:30", 11, 38, epic.getNumberId());
+                "2022-08-23 | 20:30", 11, 38, epic.getId());
         taskManager.createTask(subtask);
 
         final List<Task> subtask = taskManager.getListOfEpic();
@@ -195,7 +195,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     public void shouldNotGetListOfSubtask() {
         taskManager.createTask(epic);
         subtask = new Subtask("Subtask 1", "DescriptionSubtask 1",
-                "2022-08-23 | 20:30", 11, 38, epic.getNumberId());
+                "2022-08-23 | 20:30", 11, 38, epic.getId());
         taskManager.createTask(subtask);
 
         final List<Task> subtasks = taskManager.getListOfTask();
@@ -208,10 +208,10 @@ abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createTask(epic);
         subtask = new Subtask("Subtask 1", "DescriptionSubtask 1",
                 "2022-08-23 | 20:30", 11, 38,
-                epic.getNumberId());
+                epic.getId());
         taskManager.createTask(subtask);
 
-        final Epic savedEpic = taskManager.getEpicByID(subtask.getMyEpicID());
+        final Epic savedEpic = taskManager.getEpicByID(subtask.getEpicId());
 
         assertEquals(epic, savedEpic, "Задачи не совпадают.");
     }
@@ -219,7 +219,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     public void willTheTaskListBeCleared() {
         taskManager.createTask(task);
-        taskManager.clearListOfTask();
+        taskManager.deleteListOfTask();
 
         assertEquals(0, taskManager.getListOfTask().size(), "Неверное количество задач.");
     }
@@ -228,7 +228,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     public void willTheTaskListBeNotCleared() {
         taskManager.createTask(task);
 
-        taskManager.clearListOfTask();
+        taskManager.deleteListOfTask();
         boolean isClearLIstOfTasks = taskManager.getListOfTask().isEmpty();
 
         assertTrue(isClearLIstOfTasks, "Список задач не очищен.");
@@ -237,7 +237,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     public void willTheEpicListBeCleared() {
         taskManager.createTask(epic);
-        taskManager.clearListOfEpic();
+        taskManager.deleteListOfEpic();
 
         assertEquals(0, taskManager.getListOfEpic().size(), "Список эпиков не очищен.");
         assertEquals(0, taskManager.getListOfSubtask().size(), "Список подзадач не очищен.");
@@ -247,7 +247,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     public void willTheEpicListBeNotCleared() {
         taskManager.createTask(epic);
 
-        taskManager.clearListOfEpic();
+        taskManager.deleteListOfEpic();
         boolean isClearLIstOfEpic = taskManager.getListOfEpic().isEmpty();
         boolean isClearLIstOfSubtasksThisEpic = epic.getIdsOfSubtasksEpic().isEmpty();
 
@@ -259,9 +259,9 @@ abstract class TaskManagerTest<T extends TaskManager> {
     public void willTheSubtaskBeCleared() {
         taskManager.createTask(epic);
         subtask = new Subtask("Subtask 1", "DescriptionSubtask 1",
-                "2022-08-23 | 20:30", 11, 38, epic.getNumberId());
+                "2022-08-23 | 20:30", 11, 38, epic.getId());
         taskManager.createTask(subtask);
-        taskManager.clearListOfSubtask();
+        taskManager.deleteListOfSubtask();
 
         assertEquals(0, taskManager.getListOfSubtask().size(), "Список подзадач не очищен.");
     }
@@ -270,9 +270,9 @@ abstract class TaskManagerTest<T extends TaskManager> {
     public void willTheSubtaskListBeNotCleared() {
         taskManager.createTask(epic);
         subtask = new Subtask("Subtask 1", "DescriptionSubtask 1",
-                "2022-08-23 | 20:30", 11, 38, epic.getNumberId());
+                "2022-08-23 | 20:30", 11, 38, epic.getId());
         taskManager.createTask(subtask);
-        taskManager.clearListOfSubtask();
+        taskManager.deleteListOfSubtask();
 
         boolean isClearLIstOfSubtasks = taskManager.getListOfSubtask().isEmpty();
         boolean isClearLIstOfSubtaskThisEpic = epic.getIdsOfSubtasksEpic().isEmpty();
@@ -313,7 +313,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     public void shouldGetSubtaskByID() {
         taskManager.createTask(epic);
         subtask = new Subtask("Subtask 1", "DescriptionSubtask 1",
-                "2022-08-23 | 20:30", 11, 38, epic.getNumberId());
+                "2022-08-23 | 20:30", 11, 38, epic.getId());
         taskManager.createTask(subtask);
 
         assertEquals(subtask, taskManager.getSubtaskByID(2), "Номер подзадачи не найден");
@@ -331,7 +331,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createTask(task);
         Task newTask = new Task("Task 1.1", "DescriptionTask 1",
                 "2022-08-25 | 10:00", 1, 20);
-        newTask.setNumberId(task.getNumberId());
+        newTask.setId(task.getId());
         taskManager.updateTask(newTask);
 
         assertEquals(expectedTask, task.toString(), "Задача не обновлена");
@@ -342,7 +342,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createTask(task);
         Task newTask = new Task("Task 1.1", "DescriptionTask 1",
                 "2022-08-25 | 10:00", 1, 20);
-        newTask.setNumberId(task.getNumberId());
+        newTask.setId(task.getId());
         taskManager.updateTask(newTask);
 
         boolean isUpdateTask = newTask.equals(task);
@@ -357,7 +357,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Epic newEpic = new Epic("Epic 1.1", "DescriptionEpic 1", taskManager);
         taskManager.createTask(new Subtask("Subtask 1.1", "DescriptionSubtask 1",
                 "2022-08-25 | 10:00", 1, 20, 1));
-        newEpic.setNumberId(epic.getNumberId());
+        newEpic.setId(epic.getId());
 
         taskManager.updateEpic(newEpic);
 
@@ -370,7 +370,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Epic newEpic = new Epic("Epic 1.1", "DescriptionEpic 1", taskManager);
         taskManager.createTask(new Subtask("Subtask 1.1", "DescriptionSubtask 1",
                 "2022-08-25 | 10:00", 1, 20, 1));
-        newEpic.setNumberId(epic.getNumberId());
+        newEpic.setId(epic.getId());
 
         taskManager.updateEpic(newEpic);
         boolean isUpdateEpic = newEpic.equals(epic);
@@ -382,11 +382,11 @@ abstract class TaskManagerTest<T extends TaskManager> {
     void shouldUpdateSubtask() {
         taskManager.createTask(epic);
         subtask = new Subtask("Subtask 1", "DescriptionSubtask 1",
-                "2022-08-25 | 10:00", 1, 10, epic.getNumberId());
+                "2022-08-25 | 10:00", 1, 10, epic.getId());
         taskManager.createTask(subtask);
         Subtask newSubtask = new Subtask("Subtask 1.1", "DescriptionSubtask 1.1",
-                "2022-08-25 | 10:00", 1, 20, epic.getNumberId());
-        newSubtask.setNumberId(subtask.getNumberId());
+                "2022-08-25 | 10:00", 1, 20, epic.getId());
+        newSubtask.setId(subtask.getId());
 
         taskManager.updateSubtask(newSubtask);
 
@@ -397,11 +397,11 @@ abstract class TaskManagerTest<T extends TaskManager> {
     void shouldNotUpdateSubtask() {
         taskManager.createTask(epic);
         subtask = new Subtask("Subtask 1", "DescriptionSubtask 1",
-                "2022-08-25 | 10:00", 1, 10, epic.getNumberId());
+                "2022-08-25 | 10:00", 1, 10, epic.getId());
         taskManager.createTask(subtask);
         Subtask newSubtask = new Subtask("Subtask 1.1", "DescriptionSubtask 1",
-                "2022-08-25 | 10:00", 1, 20, epic.getNumberId());
-        newSubtask.setNumberId(subtask.getNumberId());
+                "2022-08-25 | 10:00", 1, 20, epic.getId());
+        newSubtask.setId(subtask.getId());
 
         taskManager.updateSubtask(newSubtask);
         boolean isUpdateSubtask = newSubtask.equals(subtask);
@@ -412,9 +412,9 @@ abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     public void shouldDeleteTaskForID() {
         taskManager.createTask(task);
-        taskManager.deleteTaskForID(task.getNumberId());
+        taskManager.deleteTaskForID(task.getId());
 
-        assertNull(taskManager.getTaskByID(task.getNumberId()), "Задача не удалилась");
+        assertNull(taskManager.getTaskByID(task.getId()), "Задача не удалилась");
     }
 
     @Test
@@ -422,15 +422,15 @@ abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createTask(task);
         taskManager.deleteTaskForID(2);
 
-        assertNotNull(taskManager.getTaskByID(task.getNumberId()), "Задача удалилась");
+        assertNotNull(taskManager.getTaskByID(task.getId()), "Задача удалилась");
     }
 
     @Test
     public void shouldDeleteEpicForID() {
         taskManager.createTask(epic);
-        taskManager.deleteEpicForID(epic.getNumberId());
+        taskManager.deleteEpicForID(epic.getId());
 
-        assertNull(taskManager.getEpicByID(epic.getNumberId()), "Эпик не удалился");
+        assertNull(taskManager.getEpicByID(epic.getId()), "Эпик не удалился");
     }
 
     @Test
@@ -438,29 +438,29 @@ abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.createTask(epic);
         taskManager.deleteEpicForID(2);
 
-        assertNotNull(taskManager.getEpicByID(epic.getNumberId()), "Эпик удалился");
+        assertNotNull(taskManager.getEpicByID(epic.getId()), "Эпик удалился");
     }
 
     @Test
     public void shouldDeleteSubtaskForID() {
         taskManager.createTask(epic);
         subtask = new Subtask("Subtask 1", "DescriptionSubtask 1",
-                "2022-08-23 | 20:30", 11, 38, epic.getNumberId());
+                "2022-08-23 | 20:30", 11, 38, epic.getId());
         taskManager.createTask(subtask);
-        taskManager.deleteSubtaskForID(subtask.getNumberId());
+        taskManager.deleteSubtaskForID(subtask.getId());
 
-        assertNull(taskManager.getSubtaskByID(subtask.getNumberId()), "Подзадача не удалилась");
+        assertNull(taskManager.getSubtaskByID(subtask.getId()), "Подзадача не удалилась");
     }
 
     @Test
     public void shouldNotDeleteSubtaskForID() {
         taskManager.createTask(epic);
         subtask = new Subtask("Subtask 1", "DescriptionSubtask 1",
-                "2022-08-23 | 20:30", 11, 38, epic.getNumberId());
+                "2022-08-23 | 20:30", 11, 38, epic.getId());
         taskManager.createTask(subtask);
         taskManager.deleteSubtaskForID(3);
 
-        assertNotNull(taskManager.getSubtaskByID(subtask.getNumberId()), "Подзадача не удалилась");
+        assertNotNull(taskManager.getSubtaskByID(subtask.getId()), "Подзадача не удалилась");
     }
 
     @Test
@@ -483,7 +483,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     public void shouldSetStatusSubtaskInProgress() {
         taskManager.createTask(epic);
         subtask = new Subtask("Subtask 1", "DescriptionSubtask 1",
-                "2022-08-23 | 20:30", 11, 38, epic.getNumberId());
+                "2022-08-23 | 20:30", 11, 38, epic.getId());
         taskManager.createTask(subtask);
         taskManager.setStatusForSubtask(subtask, Status.IN_PROGRESS);
 
@@ -494,7 +494,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     public void shouldSetStatusSubtaskDone() {
         taskManager.createTask(epic);
         subtask = new Subtask("Subtask 1", "DescriptionSubtask 1",
-                "2022-08-23 | 20:30", 11, 38, epic.getNumberId());
+                "2022-08-23 | 20:30", 11, 38, epic.getId());
         taskManager.createTask(subtask);
         taskManager.setStatusForSubtask(subtask, Status.DONE);
 

@@ -1,10 +1,10 @@
 package org.example.Tests;
 
-import org.example.managers_types.InMemoryHistoryManager;
-import org.example.managers_types.InMemoryTaskManager;
-import org.example.tasks_types.Epic;
-import org.example.tasks_types.Subtask;
-import org.example.tasks_types.Task;
+import org.example.manager.managers_types.InMemoryHistoryManager;
+import org.example.manager.managers_types.InMemoryTaskManager;
+import org.example.tasks.Epic;
+import org.example.tasks.Subtask;
+import org.example.tasks.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -122,6 +122,6 @@ class InMemoryHistoryManagerTest {
 
         long expectedID = taskManager.getCreatedID();
 
-        assertEquals(expectedID, subtask.getNumberId(), "Id сгенерирован неверно");
+        assertEquals(expectedID, subtask.getId(), "Id сгенерирован неверно");
     }
 }

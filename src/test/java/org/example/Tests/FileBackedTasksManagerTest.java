@@ -1,11 +1,11 @@
 package org.example.Tests;
 
-import org.example.interfaces_and_utilities.TaskManager;
-import org.example.managers_types.FileBackedTasksManager;
-import org.example.managers_types.InMemoryTaskManager;
-import org.example.tasks_types.Epic;
-import org.example.tasks_types.Subtask;
-import org.example.tasks_types.Task;
+import org.example.manager.interfaces_and_utilities.TaskManager;
+import org.example.manager.managers_types.FileBackedTasksManager;
+import org.example.manager.managers_types.InMemoryTaskManager;
+import org.example.tasks.Epic;
+import org.example.tasks.Subtask;
+import org.example.tasks.Task;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,7 +52,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest {
         fileBackedTasksManager.getTaskByID(1);
 
         FileBackedTasksManager.loadFromFile(file);
-        Task taskByID = fileBackedTasksManager.getTaskByIdWithoutStory(task1.getNumberId());
+        Task taskByID = fileBackedTasksManager.getTaskByIdWithoutStory(task1.getId());
 
         Assertions.assertEquals(expectedTask1, taskByID.toString(), "Задачи сохранены неверно");
     }
@@ -63,7 +63,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest {
         fileBackedTasksManager.getEpicByID(1);
 
         FileBackedTasksManager.loadFromFile(file);
-        Epic epicByID = fileBackedTasksManager.getEpicByIdWithoutStory(epic1.getNumberId());
+        Epic epicByID = fileBackedTasksManager.getEpicByIdWithoutStory(epic1.getId());
 
         Assertions.assertEquals(expectedEpic, epicByID.toString(), "Эпики сохранены неверно");
     }
@@ -75,7 +75,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest {
         fileBackedTasksManager.getSubtaskByID(2);
 
         FileBackedTasksManager.loadFromFile(file);
-        Subtask subtaskByID = fileBackedTasksManager.getSubtaskByIdWithoutStory(subtask.getNumberId());
+        Subtask subtaskByID = fileBackedTasksManager.getSubtaskByIdWithoutStory(subtask.getId());
 
         Assertions.assertEquals(expectedSubtask, subtaskByID.toString(), "Подзадачи сохранены неверно");
     }
